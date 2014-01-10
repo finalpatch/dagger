@@ -47,10 +47,6 @@ public:
         return m_rowCache[i];
     }
 
-    static if (hasMember!(T, "get"))
-    {
-    }
-
     ubyte[] bytes()
     {
         return cast(ubyte[])m_buf;

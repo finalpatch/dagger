@@ -13,7 +13,13 @@ ubyte[] render()
     auto buffer = new ubyte[width*height*bpp];
     auto surface = new Surface!PixfmtRGB8(buffer, width, height);
     auto red = PixfmtRGB8(RGBA8(255,0,0));
-    surface[10][].fill(red);
+    for (int y = 0; y < height; ++y)
+    {
+        for(int x = 0; x < width; ++x)
+        {
+            surface[y][x] = RGBA8(fromWaveLength(380.0 + 400.0 * x / width));
+        }
+    }
 	return surface.bytes();
 }
 

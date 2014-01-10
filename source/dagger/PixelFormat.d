@@ -20,6 +20,10 @@ struct PixfmtGray(T)
     {
         v = c.l;
     }
+    void opAssign(ColorType c)
+    {
+        set(c);
+    }
 }
 
 enum ComponentOrderRGB {
@@ -52,6 +56,10 @@ struct PixfmtRGB(T, ORD)
         components[ORD.G] = c.g;
         components[ORD.B] = c.b;
     }
+    void opAssign(ColorType c)
+    {
+        set(c);
+    }
 }
 
 struct PixfmtRGBA(T, ORD)
@@ -74,6 +82,10 @@ struct PixfmtRGBA(T, ORD)
         components[ORD.G] = c.g;
         components[ORD.B] = c.b;
         components[ORD.A] = c.a;
+    }
+    void opAssign(ColorType c)
+    {
+        set(c);
     }
 }
 
