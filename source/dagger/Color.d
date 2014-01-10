@@ -1,5 +1,7 @@
 module dagger.Color;
 
+import std.math;
+
 template CalcType(T)
 {
     static if (T.sizeof <= 2)
@@ -91,7 +93,7 @@ struct RGBA(T)
     }
 }
 
-RGBA!double fromWaveLength(double wl)
+RGBA!double fromWaveLength(double wl, double gamma = 0.8)
 {
     auto t = RGBA!double(0.0, 0.0, 0.0);
 
@@ -128,6 +130,10 @@ RGBA!double fromWaveLength(double wl)
     double s = 1.0;
     if (wl > 700.0)       s = 0.3 + 0.7 * (780.0 - wl) / (780.0 - 700.0);
     else if (wl <  420.0) s = 0.3 + 0.7 * (wl - 380.0) / (420.0 - 380.0);
+
+    t.r = pow(t.r * s, gamma);
+    t.g = pow(t.g * s, gamma);
+    t.b = pow(t.b * s, gamma);
 
     return t;
 }
