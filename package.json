@@ -1,0 +1,9 @@
+{
+	"name": "dagger",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2014, fengl",
+	"authors": ["fengl"],
+	"dependencies": {
+	    "derelict-sdl2" : "~master",
+	}
+}
