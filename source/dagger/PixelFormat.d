@@ -2,13 +2,23 @@ module dagger.PixelFormat;
 
 public import dagger.Color;
 
-struct GrayPixel(T)
+struct PixfmtGray(T)
 {
+    alias Gray!T ColorType;
+    
     T v;
     
-    Gray!T color() const
+    this(ColorType c)
     {
-        return Gray!T(v);
+        set(c);
+    }
+    ColorType get() const
+    {
+        return ColorType(v);
+    }
+    void set(ColorType c)
+    {
+        v = c.l;
     }
 }
 
@@ -22,22 +32,59 @@ enum ComponentOrderBGRA {
     B, G, R, A, NumOfComponents
 }
 
-struct RGBPixel(T, ORD)
+struct PixfmtRGB(T, ORD)
 {
+    alias RGBA!T ColorType;
+
     T[ORD.NumOfComponents] components;
 
-    RGBA!T color() const
+    this(ColorType c)
     {
-        return RGBA!T(components[ORD.R], components[ORD.G], components[ORD.B]);
+        set(c);
+    }
+    ColorType get() const
+    {
+        return ColorType(components[ORD.R], components[ORD.G], components[ORD.B]);
+    }
+    void set(ColorType c)
+    {
+        components[ORD.R] = c.r;
+        components[ORD.G] = c.g;
+        components[ORD.B] = c.b;
     }
 }
 
-struct RGBAPixel(T, ORD)
+struct PixfmtRGBA(T, ORD)
 {
+    alias RGBA!T ColorType;
+
     T[ORD.NumOfComponents] components;
 
-    RGBA!T color() const
+    this(ColorType c)
     {
-        return RGBA!T(components[ORD.R], components[ORD.G], components[ORD.B], components[ORD.A]);
+        set(c);
+    }
+    ColorType get() const
+    {
+        return ColorType(components[ORD.R], components[ORD.G], components[ORD.B], components[ORD.A]);
+    }
+    void set(ColorType c)
+    {
+        components[ORD.R] = c.r;
+        components[ORD.G] = c.g;
+        components[ORD.B] = c.b;
+        components[ORD.A] = c.a;
     }
 }
+
+alias PixfmtGray!(ubyte)                      PixfmtGray8;
+alias PixfmtGray!(ushort)                     PixfmtGray16;
+alias PixfmtGray!(float)                      PixfmtGray32;
+
+alias PixfmtRGB!(ubyte,   ComponentOrderRGB)  PixfmtRGB8;
+alias PixfmtRGB!(ushort,  ComponentOrderRGB)  PixfmtRGB16;
+alias PixfmtRGB!(float,   ComponentOrderRGB)  PixfmtRGB32;
+
+alias PixfmtRGBA!(ubyte,  ComponentOrderRGBA) PixfmtRGBA8;
+alias PixfmtRGBA!(ushort, ComponentOrderRGBA) PixfmtRGBA16;
+alias PixfmtRGBA!(float,  ComponentOrderRGBA) PixfmtRGBA32;

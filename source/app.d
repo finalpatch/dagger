@@ -1,6 +1,8 @@
 import std.stdio;
+import std.algorithm;
 import derelict.sdl2.sdl;
 import dagger.Surface;
+import dagger.PixelFormat;
 
 immutable width     = 1280;
 immutable height    = 720;
@@ -8,13 +10,11 @@ immutable bpp       = 3;
 
 ubyte[] render()
 {
-	auto data = new ubyte[width * height * bpp];
-    //auto buffer = new Surface!(ubyte)(data, width, height);
-    auto buffer = new Surface!(ubyte,Orientation.BottomUp)(data, width, height);
-
-    buffer[10][] = 0xff;
-
-	return data;
+    auto buffer = new ubyte[width*height*bpp];
+    auto surface = new Surface!PixfmtRGB8(buffer, width, height);
+    auto red = PixfmtRGB8(RGBA8(255,0,0));
+    surface[10][].fill(red);
+	return surface.bytes();
 }
 
 int main()

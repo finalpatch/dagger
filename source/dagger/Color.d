@@ -8,10 +8,10 @@ template CalcType(T)
         alias long CalcType;
 }
 
-enum BitsOf(T)  = T.sizeof * 8;
-enum ScaleOf(T) = 1 << BitsOf!T;
-enum MaskOf(T)  = ScaleOf!T - 1;
-enum MSB(T)     = 1 << (BitsOf!T - 1);
+template BitsOf(T)  { enum BitsOf  = T.sizeof * 8;    }
+template ScaleOf(T) { enum ScaleOf = 1 << BitsOf!T;   }
+template MaskOf(T)  { enum MaskOf  = ScaleOf!T - 1;   }
+template MSB(T)     { enum MSB = 1 << (BitsOf!T - 1); }
 
 T lerp(T)(T p, T q, T a)
 {
@@ -54,10 +54,6 @@ struct Gray(T)
     }
 }
 
-alias Gray!(ubyte)  Gray8;
-alias Gray!(ushort) Gray16;
-alias Gray!(float)  Gray32;
-
 struct RGBA(T)
 {
     T r,g,b,a;
@@ -72,6 +68,10 @@ struct RGBA(T)
             a = MaskOf!T;
     }
 }
+
+alias Gray!(ubyte)  Gray8;
+alias Gray!(ushort) Gray16;
+alias Gray!(float)  Gray32;
 
 alias RGBA!(ubyte)  RGBA8;
 alias RGBA!(ushort) RGBA16;
