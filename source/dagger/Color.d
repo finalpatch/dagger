@@ -1,47 +1,7 @@
 module dagger.Color;
 
 import std.math;
-
-template CalcType(T)
-{
-    static if (T.sizeof <= 2)
-        alias int CalcType;
-    else
-        alias long CalcType;
-}
-
-template BitsOf(T)  { enum BitsOf  = T.sizeof * 8;    }
-template ScaleOf(T) { enum ScaleOf = 1 << BitsOf!T;   }
-template MaskOf(T)  { enum MaskOf  = ScaleOf!T - 1;   }
-template MSB(T)     { enum MSB = 1 << (BitsOf!T - 1); }
-
-T uround(T)(double x) { return cast(T)(x + 0.5); }
-
-T lerp(T)(T p, T q, T a)
-{
-    static if (is(T==float) || is(T==double))
-    {
-        return (1 - a) * p + a * q;
-    }
-    else
-    {
-        CalcType!T t = (q - p) * cast(CalcType!T)(a) + MSB!T - (p > q);
-        return p + ((t >> BitsOf!T) + t) >> BitsOf!T;
-    }
-}
-
-T multiply(T)(T a, T b)
-{
-    static if (is(T==float) || is(T==double))
-    {
-        return a * b;
-    }
-    else
-    {
-        CalcType!T t = cast(CalcType!T)(a) * b + MSB!T;
-        return ((t >> BitsOf!T) + t) >> BitsOf!T;
-    }
-}
+import dagger.Utils;
 
 struct Gray(T)
 {
@@ -84,10 +44,10 @@ struct RGBA(T)
             }
             else
             {
-                r = uround!T(rgba.r * MaskOf!T);
-                g = uround!T(rgba.g * MaskOf!T);
-                b = uround!T(rgba.b * MaskOf!T);
-                a = uround!T(rgba.a * MaskOf!T);
+                r = cast(T)uround(rgba.r * MaskOf!T);
+                g = cast(T)uround(rgba.g * MaskOf!T);
+                b = cast(T)uround(rgba.b * MaskOf!T);
+                a = cast(T)uround(rgba.a * MaskOf!T);
             }
         }
     }
@@ -131,9 +91,9 @@ RGBA!double fromWaveLength(double wl, double gamma = 0.8)
     if (wl > 700.0)       s = 0.3 + 0.7 * (780.0 - wl) / (780.0 - 700.0);
     else if (wl <  420.0) s = 0.3 + 0.7 * (wl - 380.0) / (420.0 - 380.0);
 
-    t.r = pow(t.r * s, gamma);
-    t.g = pow(t.g * s, gamma);
-    t.b = pow(t.b * s, gamma);
+    t.r = (t.r * s) ^^ gamma;
+    t.g = (t.g * s) ^^ gamma;
+    t.b = (t.b * s) ^^ gamma;
 
     return t;
 }
