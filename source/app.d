@@ -1,25 +1,81 @@
 import std.stdio;
 import std.algorithm;
+import std.math;
 import derelict.sdl2.sdl;
 import dagger.Surface;
 import dagger.PixelFormat;
+import dagger.Rasterizer;
 
-immutable width     = 1280;
-immutable height    = 720;
+immutable width     = 200;
+immutable height    = 200;
 immutable bpp       = 3;
 
 ubyte[] render()
 {
     auto buffer = new ubyte[width*height*bpp];
     auto surface = new Surface!PixfmtRGB8(buffer, width, height);
-    auto red = PixfmtRGB8(RGBA8(255,0,0));
-    for (int y = 0; y < height; ++y)
+
+    auto r = new Rasterizer();
+    r.xline(10,10, 190, 80);
+    r.xline(190,80, 100, 190);
+    r.xline(100,190, 10, 10);
+    r.finish();
+
+    Cell[][] lines = new Cell[][r.bottom - r.top];
+    auto cells = r.cells();
+    int prev = 0;
+    for(int i = 0; i < cells.length; ++i)
     {
-        for(int x = 0; x < width; ++x)
+        if (cells[i].y == cells[prev].y)
+            continue;
+        lines[cells[prev].y-r.top] = cells[prev..i];
+        prev = i;
+    }
+    lines[cells[prev].y-r.top] = cells[prev..$];
+    
+    for(int y = r.top; y < r.bottom; ++y)
+    {
+        auto line = lines[y - r.top];
+        writefln("line %s %s", y, line);
+        int cover = 0;
+        while(line.length > 0)
         {
-            surface[y][x] = RGBA8(fromWaveLength(380.0 + 400.0 * x / width));
+            int x = line[0].x;
+            int area = line[0].area;
+            cover += line[0].cover;
+
+            do
+            {
+                line = line[1..$];
+                if (line.length == 0 || line[0].x != x)
+                    break;
+                area += line[0].area;
+                cover += line[0].cover;
+            } while (line.length > 0);
+
+            if (area)
+            {
+                auto a = cast(ubyte)min(255, abs((cover * 512 - area ) >> 9));
+                if (a)
+                {
+                    writefln("cell %s %s", x, a);
+                    surface[y][x] = PixfmtRGB8(RGBA8(a,a,a));
+                }
+                x++;
+            }
+
+            if (line.length > 0 && line[0].x > x)
+            {
+                auto a = cast(ubyte)min(255, abs(cover));
+                if (a)
+                {
+                    writefln("span %s %s %s", x, line[0].x, a);
+                    surface[y][x..line[0].x] = PixfmtRGB8(RGBA8(a,a,a));
+                }
+            }
         }
     }
+    
 	return surface.bytes();
 }
 
