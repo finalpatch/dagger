@@ -33,6 +33,13 @@ public:
 	{
 		addLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
 	}
+    void reset()
+    {
+        m_cells = [];
+        with(m_currentCell)
+            x = y = cover = area = 0;
+        m_left = m_top = m_right = m_bottom = 0;
+    }
 package:
     Cell[] finish()
     {
@@ -42,13 +49,6 @@ package:
         }
         sortCells();
 		return m_cells;
-    }
-    void reset()
-    {
-        m_cells = [];
-        with(m_currentCell)
-            x = y = cover = area = 0;
-        m_left = m_top = m_right = m_bottom = 0;
     }
     
     int left()  { return m_left;  }

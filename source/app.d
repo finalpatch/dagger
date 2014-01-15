@@ -29,19 +29,22 @@ private:
 
 ubyte[] draw()
 {
-    auto buffer = new ubyte[width*height*bpp];
-	
+    auto buffer = new ubyte[width*height*bpp];	
     auto surface = new Surface!PixfmtRGB8(buffer, width, height);
 
     auto ras = new Rasterizer();
-    ras.line(10,10, 190, 80);
-    ras.line(190,80, 100, 190);
-    ras.line(100,190, 10, 10);
+    ras.line(100, 10, 190,160);
+    ras.line(120,160, 10, 160);
+    ras.line(10, 160, 100,10);
+    render(new StupidRenderer(buffer), ras);
 
-	auto ren = solidColorRenderer(surface, PixfmtRGB8(RGBA8(255,0,0)));
-    // auto ren = new StupidRenderer(buffer);
+    ras.reset();
+    ras.line(10, 10, 190,80);
+    ras.line(190,80, 100,190);
+    ras.line(100,190,10, 10);
+	auto ren = solidColorRenderer(surface, PixfmtRGB8(RGBA8(0,255,0)));
 	render(ren, ras);
-    
+
 	return surface.bytes();
 }
 
