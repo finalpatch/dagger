@@ -22,6 +22,19 @@ T lerp(T)(T p, T q, T a)
     else if (isIntegral!T)
     {
 		CalcType!T cp = p, cq = q, ca = a;
-		return cast(T)((cq * a + cp * (T.max - a) + T.max / 2) >> (T.sizeof * 8));
+		return cast(T)((cq * a + cp * (T.max - a) + (T.max >> 1)) >> (T.sizeof * 8));
+    }
+}
+
+T multiply(T)(T a, T b)
+{
+	static if (isFloatingPoint!T)
+    {
+        return a * b;
+    }
+    else if (isIntegral!T)
+    {
+        CalcType!T t = a;
+        return cast(T)((t * b + (T.max >> 1)) >> (T.sizeof * 8));
     }
 }

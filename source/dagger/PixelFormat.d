@@ -27,8 +27,10 @@ struct PixfmtGray(T)
     {
         set(c);
     }
+
 	void blend(selfType pixel, ComponentType alpha)
 	{
+		v = lerp(v, pixel.v, alpha);
 	}
 }
 
@@ -56,7 +58,7 @@ struct PixfmtRGB(T, ORD)
     }
     ColorType get() const
     {
-        return ColorType(components[ORD.R], components[ORD.G], components[ORD.B]);
+        return ColorType(r,g,b);
     }
     void set(ColorType c)
     {
@@ -68,11 +70,16 @@ struct PixfmtRGB(T, ORD)
     {
         set(c);
     }
-	void blend(selfType pixel, ComponentType alpha)
+
+    T r() const { return components[ORD.R]; }
+    T g() const { return components[ORD.G]; }
+    T b() const { return components[ORD.B]; }
+
+    void blend(selfType pixel, ComponentType alpha)
 	{
-		components[ORD.R] = lerp(components[ORD.R], pixel.components[ORD.R], alpha);
-		components[ORD.G] = lerp(components[ORD.G], pixel.components[ORD.G], alpha);
-		components[ORD.B] = lerp(components[ORD.B], pixel.components[ORD.B], alpha);
+		components[ORD.R] = lerp(r, pixel.r, alpha);
+		components[ORD.G] = lerp(g, pixel.g, alpha);
+		components[ORD.B] = lerp(b, pixel.b, alpha);
 	}
 }
 
@@ -90,7 +97,7 @@ struct PixfmtRGBA(T, ORD)
     }
     ColorType get() const
     {
-        return ColorType(components[ORD.R], components[ORD.G], components[ORD.B], components[ORD.A]);
+        return ColorType(r,g,b,a);
     }
     void set(ColorType c)
     {
@@ -103,8 +110,18 @@ struct PixfmtRGBA(T, ORD)
     {
         set(c);
     }
+
+    T r() const { return components[ORD.R]; }
+    T g() const { return components[ORD.G]; }
+    T b() const { return components[ORD.B]; }
+    T a() const { return components[ORD.A]; } 
+   
 	void blend(selfType pixel, ComponentType alpha)
 	{
+        components[ORD.A] = multiply(a, alpha);
+		components[ORD.R] = lerp(r, pixel.r, a);
+		components[ORD.G] = lerp(g, pixel.g, a);
+		components[ORD.B] = lerp(b, pixel.b, a);
 	}
 }
 
