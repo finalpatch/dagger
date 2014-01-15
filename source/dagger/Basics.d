@@ -4,10 +4,20 @@ import std.traits;
 
 private template CalcType(T)
 {
-    static if (T.sizeof <= 2)
-        alias int CalcType;
+    static if (isSigned!T)
+    {
+        static if (T.sizeof <= 2)
+            alias int CalcType;
+        else
+            alias long CalcType;
+    }
     else
-        alias long CalcType;
+    {
+        static if (T.sizeof <= 2)
+            alias uint CalcType;
+        else
+            alias ulong CalcType;
+    }
 }
 
 int  iround(double x) { return cast(int)((x < 0.0) ? x - 0.5 : x + 0.5); }
