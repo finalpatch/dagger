@@ -35,7 +35,7 @@ auto solidColorRenderer(SURFACE, PIXEL)(SURFACE surface, PIXEL pixel)
 
 // -----------------------------------------------------------------------------
 
-void render(RENDERER)(RENDERER renderer, Rasterizer ras)
+void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
 {
     Cell[][] lines = new Cell[][ras.bottom - ras.top];
     auto cells = ras.cells();
@@ -68,9 +68,13 @@ void render(RENDERER)(RENDERER renderer, Rasterizer ras)
                 cover += line[0].cover;
             } while (line.length > 0);
 
+			alias RENDERER.ComponentType valtype;
+			enum shift = RASTERIZER.subPixelAccuracy;
+			enum shift2 = shift + 1;
+
             if (area)
             {
-                auto a = scaleAlpha!(RENDERER.ComponentType)(abs((cover * 512 - area ) >> 9));
+                auto a = scaleAlpha!(valtype, shift)(abs((cover << shift2) - area ) >> shift2);
                 if (a)
                     renderer.blendHSpanSolid(x,y, a, 1);
                 x++;
@@ -78,7 +82,7 @@ void render(RENDERER)(RENDERER renderer, Rasterizer ras)
 
             if (line.length > 0 && line[0].x > x)
             {
-                auto a = scaleAlpha!(RENDERER.ComponentType)(abs(cover));
+                auto a = scaleAlpha!(valtype, shift)(abs(cover));
                 if (a)
 					renderer.blendHSpanSolid(x,y, a, line[0].x-x);
             }
@@ -86,14 +90,17 @@ void render(RENDERER)(RENDERER renderer, Rasterizer ras)
     }
 }
 
-private T scaleAlpha(T)(uint a)
+private T scaleAlpha(T, int Accuracy)(int a)
 {
     static if (isFloatingPoint!T)
     {
-        return min(1.0, a / 256.0); // FIXME: use accuracy
+        return min(1.0, cast(T)a / (1 << Accuracy));
     }
     else if (isIntegral!T)
     {
-		return cast(T)(min(T.max, a << ((T.sizeof - 1)*8)));
+		static if (T.sizeof * 8 >= Accuracy)
+			return cast(T)(min(T.max, a << (T.sizeof * 8 - Accuracy)));
+		else
+			return cast(T)(min(T.max, a >> (Accuracy - T.sizeof * 8)));
     }
 }

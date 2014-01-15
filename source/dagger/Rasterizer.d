@@ -1,13 +1,9 @@
 module dagger.Rasterizer;
 
-import std.stdio;
 import std.algorithm;
 import dagger.Basics;
 
-immutable subPixelAccuracy = 8;
-immutable cellWidth = 1 << subPixelAccuracy;
-
-package void map_line_spans(alias F)(int a1, int b1, int a2, int b2)
+package void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int b2)
 {
 	auto b1_m = b1 / cellWidth;
 	auto b1_f = b1 % cellWidth;
@@ -38,7 +34,7 @@ package void map_line_spans(alias F)(int a1, int b1, int a2, int b2)
 			to_boundary = 0;
 			first = b1_f;
 		}
-		auto t1 = delta_b >> 1;
+		auto t1 = delta_b / 2;
 		auto t2 = delta_b % 2;
         auto t3 = delta_a * first + t1 + t2;
 		auto a  = t3 / delta_b;
@@ -65,7 +61,7 @@ package void map_line_spans(alias F)(int a1, int b1, int a2, int b2)
 	}
 }
 
-package void map_grid_spans(alias F)(int x1, int y1, int x2, int y2)
+package void map_grid_spans(int cellWidth, alias F)(int x1, int y1, int x2, int y2)
 {
 	void hline(int y_m, int x1, int y1_f, int x2, int y2_f)
 	{
@@ -73,9 +69,9 @@ package void map_grid_spans(alias F)(int x1, int y1, int x2, int y2)
 		{
 			F(x_m, y_m, x1_f, y1_f, x2_f, y2_f);
 		}
-		map_line_spans!pixel(y1_f, x1, y2_f, x2);
+		map_line_spans!(cellWidth, pixel)(y1_f, x1, y2_f, x2);
 	}
-	map_line_spans!hline(x1, y1, x2, y2);
+	map_line_spans!(cellWidth, hline)(x1, y1, x2, y2);
 }
 
 struct Cell
@@ -86,9 +82,12 @@ struct Cell
     int area;
 }
 
-class Rasterizer
+class RasterizerT(uint SubPixelAccuracy)
 {
 public:
+	enum cellWidth = 1 << subPixelAccuracy;
+	enum subPixelAccuracy = SubPixelAccuracy;
+	
     this()
     {
         m_left = int.max;
@@ -98,16 +97,16 @@ public:
     }
     
     void xline(double x1, double y1, double x2, double y2)
-    {
+	{
         line(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
-    }
+	}
     void line(int x1, int y1, int x2, int y2)
     {
         void callUpdateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
         {
             this.updateCell(x, y, fx1, fy1, fx2, fy2);
         }
-        map_grid_spans!callUpdateCell(x1, y1, x2, y2);
+        map_grid_spans!(cellWidth, callUpdateCell)(x1, y1, x2, y2);
     }
     void finish()
     {
@@ -178,3 +177,5 @@ private:
         sort!compareCells(m_cells);
     }
 }
+
+alias RasterizerT!8 Rasterizer;
