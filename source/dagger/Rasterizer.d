@@ -18,10 +18,11 @@ package void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int 
 		auto b_m = b1_m;
 		auto delta_a = a2 - a1;
 		auto delta_b = b2 - b1;
-		int b_incr, from_boundary, to_boundary, first;
-		if (delta_b >= 0)
+		auto b_incr = b2 > b1 ? 1 : (b2 < b1 ? -1 : 0);
+		auto a_incr = a2 > a1 ? 1 : (a2 < a1 ? -1 : 0);
+		int from_boundary, to_boundary, first;
+		if (b2 > b1)
 		{
-			b_incr = 1;
 			from_boundary = 0;
 			to_boundary = cellWidth;
 			first = cellWidth - b1_f;
@@ -29,30 +30,26 @@ package void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int 
 		else
 		{
 			delta_b = -delta_b;
-			b_incr = -1;
 			from_boundary = cellWidth;
 			to_boundary = 0;
 			first = b1_f;
 		}
-		auto t1 = delta_b / 2;
-		auto t2 = delta_b % 2;
-        auto t3 = delta_a * first + t1 + t2;
-		auto a  = t3 / delta_b;
-		auto ma = t3 % delta_b;
+		auto a  = (first * delta_a) / delta_b;
+		auto ma = (first * delta_a) % delta_b;
 		a += a1;
 		F(b1_m, a1, b1_f, a, to_boundary);
 		b_m += b_incr;
+		auto step = (cellWidth * delta_a) / delta_b;
+		auto mod  = (cellWidth * delta_a) % delta_b;
 		while (b_m != b2_m)
 		{
-			auto step = (cellWidth * delta_a) / delta_b;
-			auto mod  = (cellWidth * delta_a) % delta_b;
 			auto prev_a = a;
 			a += step;
 			ma += mod;
-			if (ma >= delta_b)
+			if (ma * a_incr >= delta_b)
 			{
-				a++;
-				ma -= delta_b;
+				a += a_incr;
+				ma -= delta_b * a_incr;
 			}
 			F(b_m, prev_a, from_boundary, a, to_boundary);
 			b_m += b_incr;
