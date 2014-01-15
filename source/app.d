@@ -17,10 +17,9 @@ ubyte[] draw()
     auto surface = new Surface!PixfmtRGB8(buffer, width, height);
 
     auto ras = new Rasterizer();
-    ras.xline(10,10, 190, 80);
-    ras.xline(190,80, 100, 190);
-    ras.xline(100,190, 10, 10);
-    ras.finish();
+    ras.line(10,10, 190, 80);
+    ras.line(190,80, 100, 190);
+    ras.line(100,190, 10, 10);
 
 	auto ren = solidColorRenderer(surface, PixfmtRGB8(RGBA8(0,0,0)));
 	render(ren, ras);

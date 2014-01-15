@@ -38,7 +38,7 @@ auto solidColorRenderer(SURFACE, PIXEL)(SURFACE surface, PIXEL pixel)
 void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
 {
     Cell[][] lines = new Cell[][ras.bottom - ras.top];
-    auto cells = ras.cells();
+    auto cells = ras.finish();
     int prev = 0;
     for(int i = 0; i < cells.length; ++i)
     {

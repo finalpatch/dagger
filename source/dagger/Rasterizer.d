@@ -3,7 +3,118 @@ module dagger.Rasterizer;
 import std.algorithm;
 import dagger.Basics;
 
-package void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int b2)
+struct Cell
+{
+    int x;
+    int y;
+    int cover;
+    int area;
+}
+
+class RasterizerT(uint SubPixelAccuracy)
+{
+public:
+	enum cellWidth = 1 << subPixelAccuracy;
+	enum subPixelAccuracy = SubPixelAccuracy;
+	
+    this()
+    {
+        m_left = int.max;
+        m_top = int.max;
+        m_right = int.min;
+        m_bottom = int.min;
+    }
+    
+    void line(double x1, double y1, double x2, double y2)
+	{
+        addLine(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
+	}
+    void line(int x1, int y1, int x2, int y2)
+	{
+		addLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
+	}
+package:
+    Cell[] finish()
+    {
+        if (m_currentCell.cover && m_currentCell.area)
+        {
+            m_cells ~= m_currentCell;
+        }
+        sortCells();
+		return m_cells;
+    }
+    void reset()
+    {
+        m_cells = [];
+        with(m_currentCell)
+            x = y = cover = area = 0;
+        m_left = m_top = m_right = m_bottom = 0;
+    }
+    
+    int left()  { return m_left;  }
+    int top()   { return m_top;   }
+    int right() { return m_right; }
+    int bottom(){ return m_bottom;}
+private:
+    Cell[] m_cells;
+    Cell m_currentCell;
+    int m_left, m_top, m_right, m_bottom;
+
+    void addLine(int x1, int y1, int x2, int y2)
+    {
+        void callUpdateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
+        {
+            this.updateCell(x, y, fx1, fy1, fx2, fy2);
+        }
+        map_grid_spans!(cellWidth, callUpdateCell)(x1, y1, x2, y2);
+    }
+	
+    void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
+    {
+        if (x != m_currentCell.x || y != m_currentCell.y)
+        {
+            if (m_currentCell.cover && m_currentCell.area)
+            {
+                m_cells ~= m_currentCell;
+            }
+            m_currentCell.x = x;
+            m_currentCell.y = y;
+            m_currentCell.cover = 0;
+            m_currentCell.area = 0;
+            
+            if (x < m_left)
+                m_left = x;
+            else if (x > m_right)
+                m_right = x;
+            if (y < m_top)
+                m_top = y;
+            else if (y > m_bottom)
+                m_bottom = y;
+        }
+        auto delta = fy2 - fy1;
+        m_currentCell.cover += delta;
+        m_currentCell.area += (fx1 + fx2) * delta;
+    }
+    void sortCells()
+    {
+        bool compareCells(in Cell a, in Cell b)
+        {
+            if (a.y < b.y)
+                return true;
+            else if (a.y > b.y)
+                return false;
+            else
+                return a.x < b.x;
+        }
+        sort!compareCells(m_cells);
+    }
+}
+
+alias RasterizerT!8 Rasterizer;
+
+// -----------------------------------------------------------------------------
+
+private void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int b2)
 {
 	auto b1_m = b1 / cellWidth;
 	auto b1_f = b1 % cellWidth;
@@ -58,7 +169,7 @@ package void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int 
 	}
 }
 
-package void map_grid_spans(int cellWidth, alias F)(int x1, int y1, int x2, int y2)
+private void map_grid_spans(int cellWidth, alias F)(int x1, int y1, int x2, int y2)
 {
 	void hline(int y_m, int x1, int y1_f, int x2, int y2_f)
 	{
@@ -70,109 +181,3 @@ package void map_grid_spans(int cellWidth, alias F)(int x1, int y1, int x2, int 
 	}
 	map_line_spans!(cellWidth, hline)(x1, y1, x2, y2);
 }
-
-struct Cell
-{
-    int x;
-    int y;
-    int cover;
-    int area;
-}
-
-class RasterizerT(uint SubPixelAccuracy)
-{
-public:
-	enum cellWidth = 1 << subPixelAccuracy;
-	enum subPixelAccuracy = SubPixelAccuracy;
-	
-    this()
-    {
-        m_left = int.max;
-        m_top = int.max;
-        m_right = int.min;
-        m_bottom = int.min;
-    }
-    
-    void xline(double x1, double y1, double x2, double y2)
-	{
-        line(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
-	}
-    void line(int x1, int y1, int x2, int y2)
-    {
-        void callUpdateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
-        {
-            this.updateCell(x, y, fx1, fy1, fx2, fy2);
-        }
-        map_grid_spans!(cellWidth, callUpdateCell)(x1, y1, x2, y2);
-    }
-    void finish()
-    {
-        if (m_currentCell.cover && m_currentCell.area)
-        {
-            m_cells ~= m_currentCell;
-        }
-        sortCells();
-    }
-    void reset()
-    {
-        m_cells = [];
-        with(m_currentCell)
-            x = y = cover = area = 0;
-        m_left = m_top = m_right = m_bottom = 0;
-    }
-    Cell[] cells()
-    {
-        return m_cells;
-    }
-    
-    int left()  { return m_left;  }
-    int top()   { return m_top;   }
-    int right() { return m_right; }
-    int bottom(){ return m_bottom;}
-private:
-    Cell[] m_cells;
-    Cell m_currentCell;
-    int m_left, m_top, m_right, m_bottom;
-
-    void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
-    {
-        if (x != m_currentCell.x || y != m_currentCell.y)
-        {
-            if (m_currentCell.cover && m_currentCell.area)
-            {
-                m_cells ~= m_currentCell;
-            }
-            m_currentCell.x = x;
-            m_currentCell.y = y;
-            m_currentCell.cover = 0;
-            m_currentCell.area = 0;
-            
-            if (x < m_left)
-                m_left = x;
-            else if (x > m_right)
-                m_right = x;
-            if (y < m_top)
-                m_top = y;
-            else if (y > m_bottom)
-                m_bottom = y;
-        }
-        auto delta = fy2 - fy1;
-        m_currentCell.cover += delta;
-        m_currentCell.area += (fx1 + fx2) * delta;
-    }
-    void sortCells()
-    {
-        bool compareCells(in Cell a, in Cell b)
-        {
-            if (a.y < b.y)
-                return true;
-            else if (a.y > b.y)
-                return false;
-            else
-                return a.x < b.x;
-        }
-        sort!compareCells(m_cells);
-    }
-}
-
-alias RasterizerT!8 Rasterizer;
