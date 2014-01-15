@@ -12,6 +12,8 @@ immutable bpp       = 3;
 ubyte[] draw()
 {
     auto buffer = new ubyte[width*height*bpp];
+	buffer[] = 255;
+	
     auto surface = new Surface!PixfmtRGB8(buffer, width, height);
 
     auto ras = new Rasterizer();

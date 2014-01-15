@@ -86,11 +86,11 @@ void render(RENDERER)(RENDERER renderer, Rasterizer ras)
     }
 }
 
-private T scaleAlpha(T)(uint a)	// 0 <= a <= 256
+private T scaleAlpha(T)(uint a)
 {
     static if (isFloatingPoint!T)
     {
-        return min(1.0, a / 256.0);
+        return min(1.0, a / 256.0); // FIXME: use accuracy
     }
     else if (isIntegral!T)
     {
