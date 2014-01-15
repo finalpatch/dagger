@@ -1,7 +1,8 @@
 module dagger.Color;
 
 import std.math;
-import dagger.Utils;
+import std.traits;
+import dagger.Basics;
 
 struct Gray(T)
 {
@@ -11,10 +12,10 @@ struct Gray(T)
     this(T _l)
     {
         l = _l;
-        static if (is(T==float) || is(T==double))
+		static if (isFloatingPoint!T)
             a = 1.0;
-        else
-            a = MaskOf!T;
+		else if (isIntegral!T)
+            a = T.max;
     }
 }
 
@@ -26,10 +27,10 @@ struct RGBA(T)
     this(T _r, T _g, T _b)
     {
         r = _r; g = _g; b = _b;
-        static if (is(T==float) || is(T==double))
+        static if (isFloatingPoint!T)
             a = 1.0;
-        else
-            a = MaskOf!T;
+        else if (isIntegral!T)
+            a = T.max;
     }
     static if (!is(T==double))
     {
@@ -44,10 +45,10 @@ struct RGBA(T)
             }
             else
             {
-                r = cast(T)uround(rgba.r * MaskOf!T);
-                g = cast(T)uround(rgba.g * MaskOf!T);
-                b = cast(T)uround(rgba.b * MaskOf!T);
-                a = cast(T)uround(rgba.a * MaskOf!T);
+                r = cast(T)uround(rgba.r * T.max);
+                g = cast(T)uround(rgba.g * T.max);
+                b = cast(T)uround(rgba.b * T.max);
+                a = cast(T)uround(rgba.a * T.max);
             }
         }
     }

@@ -11,6 +11,8 @@ enum RowOrder {
 class Surface(T, RowOrder rowOrder = RowOrder.TopDown)
 {
 public:
+	alias T valueType;
+
     this()(uint width, uint height)
     {
         T[] buf = new T[width * height];
@@ -51,7 +53,7 @@ public:
     {
         return cast(ubyte[])m_buf;
     }
-    
+
 private:
 	T[]   m_buf;
     T[][] m_rowCache;

@@ -2,12 +2,12 @@ module dagger.Rasterizer;
 
 import std.stdio;
 import std.algorithm;
-import dagger.Utils;
+import dagger.Basics;
 
 immutable subPixelAccuracy = 8;
 immutable cellWidth = 1 << subPixelAccuracy;
 
-void map_line_spans(alias F)(int a1, int b1, int a2, int b2)
+package void map_line_spans(alias F)(int a1, int b1, int a2, int b2)
 {
 	auto b1_m = b1 / cellWidth;
 	auto b1_f = b1 % cellWidth;
@@ -65,7 +65,7 @@ void map_line_spans(alias F)(int a1, int b1, int a2, int b2)
 	}
 }
 
-void map_grid_spans(alias F)(int x1, int y1, int x2, int y2)
+package void map_grid_spans(alias F)(int x1, int y1, int x2, int y2)
 {
 	void hline(int y_m, int x1, int y1_f, int x2, int y2_f)
 	{

@@ -1,9 +1,12 @@
 module dagger.PixelFormat;
 
 public import dagger.Color;
+import dagger.Basics;
 
 struct PixfmtGray(T)
 {
+	alias PixfmtGray!T selfType;
+	alias T ComponentType;
     alias Gray!T ColorType;
     
     T v;
@@ -24,6 +27,9 @@ struct PixfmtGray(T)
     {
         set(c);
     }
+	void blend(selfType pixel, ComponentType alpha)
+	{
+	}
 }
 
 enum ComponentOrderRGB {
@@ -38,6 +44,8 @@ enum ComponentOrderBGRA {
 
 struct PixfmtRGB(T, ORD)
 {
+	alias PixfmtRGB!(T, ORD) selfType;
+	alias T ComponentType;
     alias RGBA!T ColorType;
 
     T[ORD.NumOfComponents] components;
@@ -60,10 +68,18 @@ struct PixfmtRGB(T, ORD)
     {
         set(c);
     }
+	void blend(selfType pixel, ComponentType alpha)
+	{
+		components[ORD.R] = lerp(components[ORD.R], pixel.components[ORD.R], alpha);
+		components[ORD.G] = lerp(components[ORD.G], pixel.components[ORD.G], alpha);
+		components[ORD.B] = lerp(components[ORD.B], pixel.components[ORD.B], alpha);
+	}
 }
 
 struct PixfmtRGBA(T, ORD)
 {
+	alias PixfmtRGBA!(T, ORD) selfType;
+	alias T ComponentType;
     alias RGBA!T ColorType;
 
     T[ORD.NumOfComponents] components;
@@ -87,6 +103,9 @@ struct PixfmtRGBA(T, ORD)
     {
         set(c);
     }
+	void blend(selfType pixel, ComponentType alpha)
+	{
+	}
 }
 
 alias PixfmtGray!(ubyte)                      PixfmtGray8;
