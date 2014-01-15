@@ -11,14 +11,14 @@ import dagger.PixelFormat;
 class SolidColorRenderer(SURFACE)
 {
 public:
-	alias SURFACE.valueType.ComponentType ComponentType;
+	alias SURFACE.valueType.ComponentType CoverType;
 
 	this(SURFACE surface, SURFACE.valueType pixel)
 	{
 		m_surface = surface;
 		m_pixel = pixel;
 	}
-	void blendHSpanSolid(int x, int y, ComponentType cover, uint length)
+	void renderSpan(int x, int y, CoverType cover, uint length)
 	{
 		foreach(ref p; m_surface[y][x .. x + length])
 			p.blend(m_pixel, cover);
@@ -68,23 +68,23 @@ void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
                 cover += line[0].cover;
             } while (line.length > 0);
 
-			alias RENDERER.ComponentType valtype;
+			alias RENDERER.CoverType CoverType;
 			enum shift = RASTERIZER.subPixelAccuracy;
 			enum shift2 = shift + 1;
 
             if (area)
             {
-                auto a = scaleAlpha!(valtype, shift)(abs((cover << shift2) - area ) >> shift2);
+                auto a = scaleAlpha!(CoverType, shift)(abs((cover << shift2) - area ) >> shift2);
                 if (a)
-                    renderer.blendHSpanSolid(x,y, a, 1);
+                    renderer.renderSpan(x,y, a, 1);
                 x++;
             }
 
             if (line.length > 0 && line[0].x > x)
             {
-                auto a = scaleAlpha!(valtype, shift)(abs(cover));
+                auto a = scaleAlpha!(CoverType, shift)(abs(cover));
                 if (a)
-					renderer.blendHSpanSolid(x,y, a, line[0].x-x);
+					renderer.renderSpan(x,y, a, line[0].x-x);
             }
         }
     }

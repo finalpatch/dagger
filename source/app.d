@@ -9,10 +9,27 @@ immutable width     = 200;
 immutable height    = 200;
 immutable bpp       = 3;
 
+class StupidRenderer
+{
+    alias ubyte CoverType;
+    this(ubyte[] buf)
+    {
+        m_buf = buf;
+    }
+    void renderSpan(int x, int y, CoverType cover, uint length)
+    {
+        int p = y * 200 * 3 + x * 3;
+        auto pixel = m_buf.ptr + p;
+        foreach(i; 0..length)
+            pixel[i*3] = cover;
+    }
+private:
+    ubyte[] m_buf;
+}
+
 ubyte[] draw()
 {
     auto buffer = new ubyte[width*height*bpp];
-	buffer[] = 255;
 	
     auto surface = new Surface!PixfmtRGB8(buffer, width, height);
 
@@ -21,7 +38,8 @@ ubyte[] draw()
     ras.line(190,80, 100, 190);
     ras.line(100,190, 10, 10);
 
-	auto ren = solidColorRenderer(surface, PixfmtRGB8(RGBA8(0,0,0)));
+	auto ren = solidColorRenderer(surface, PixfmtRGB8(RGBA8(255,0,0)));
+    // auto ren = new StupidRenderer(buffer);
 	render(ren, ras);
     
 	return surface.bytes();
