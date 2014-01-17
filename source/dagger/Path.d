@@ -10,8 +10,7 @@ enum PathCmd {
 struct VertexT(T)
 {
     PathCmd cmd;
-    T x;
-    T y;
+    T x, y;
 
     this(PathCmd _cmd, T _x, T _y)
     {
