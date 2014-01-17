@@ -1,7 +1,9 @@
 module dagger.Rasterizer;
 
 import std.algorithm;
+import std.traits;
 import dagger.Basics;
+import dagger.Path;
 
 struct Cell
 {
@@ -24,14 +26,32 @@ public:
         m_right = int.min;
         m_bottom = int.min;
     }
-    
-    void line(double x1, double y1, double x2, double y2)
+    void addPath(PathRange)(PathRange path)
+    {
+        Vertex prev;
+        foreach(v; path)
+        {
+            final switch (v.cmd)
+            {
+            case PathCmd.MoveTo:
+                break;
+            case PathCmd.LineTo:
+                line(prev.x, prev.y, v.x, v.y);
+                break;
+            }
+            prev = v;
+        }
+    }
+    void line(T)(T x1, T y1, T x2, T y2)
 	{
-        addLine(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
-	}
-    void line(int x1, int y1, int x2, int y2)
-	{
-		addLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
+        static if (isFloatingPoint!T)
+        {
+            addLine(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
+        }
+        else if (isIntegral!T)
+        {
+            addLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
+        }
 	}
     void reset()
     {

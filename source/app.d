@@ -4,6 +4,7 @@ import dagger.Surface;
 import dagger.PixelFormat;
 import dagger.Rasterizer;
 import dagger.Renderer;
+import dagger.Path;
 
 immutable width     = 200;
 immutable height    = 200;
@@ -32,16 +33,20 @@ ubyte[] draw()
     auto buffer = new ubyte[width*height*bpp];	
     auto surface = new Surface!PixfmtRGB8(buffer, width, height);
 
+    Vertex[] path;
+    path.moveTo(100, 10).lineTo(190,160).lineTo(10,160).lineTo(100,10);
+
     auto ras = new Rasterizer();
-    ras.line(100, 10, 190,160);
-    ras.line(120,160, 10, 160);
-    ras.line(10, 160, 100,10);
+    ras.addPath(path);
     render(new StupidRenderer(buffer), ras);
 
+    // -----------------------------------------------------------------------------
+
+    path = [];
+    path.moveTo(10, 10).lineTo(190,80).lineTo(100,190).lineTo(10,10);
+
     ras.reset();
-    ras.line(10, 10, 190,80);
-    ras.line(190,80, 100,190);
-    ras.line(100,190,10, 10);
+    ras.addPath(path);
 	auto ren = solidColorRenderer(surface, PixfmtRGB8(RGBA8(0,255,0)));
 	render(ren, ras);
 
