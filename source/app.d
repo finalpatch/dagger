@@ -1,6 +1,8 @@
 import std.stdio;
 import std.string;
 import std.conv;
+import std.math;
+import std.datetime;
 import derelict.sdl2.sdl;
 import dagger.Surface;
 import dagger.PixelFormat;
@@ -22,6 +24,9 @@ ubyte[] draw()
     PixfmtRGB8 clr;
     uint cmd; // 0 move, 1 line
     Vertex[] path;
+    auto m = Matrix!(double,3)(1, tan(PI/10), 20,
+                               0, 1, 10,
+                               0, 0, 1);
     foreach(line; lion.splitLines())
     {
         if (line[0] != 'M' && line[0] != 'L')
@@ -29,7 +34,7 @@ ubyte[] draw()
             if (path.length > 0)
             {
                 ras.reset();
-                ras.addPath(path);
+                ras.addPath(transform(path, m));
                 auto ren = solidColorRenderer(surface, clr);
                 render(ren, ras);
             }            
@@ -64,7 +69,7 @@ ubyte[] draw()
     if (path.length > 0)
     {
         ras.reset();
-        ras.addPath(path);
+        ras.addPath(transform(path, m));
         auto ren = solidColorRenderer(surface, clr);
         render(ren, ras);
     }
@@ -96,7 +101,10 @@ int main()
         return -1;
     }
 
+    auto start = Clock.currTime();
     ubyte[] buffer = draw();
+    auto elapsed = Clock.currTime() - start;
+    writefln("%s", elapsed);
 
     SDL_UpdateTexture(tex, cast(const(SDL_Rect)*)null, cast(const void*)buffer, width * bpp);
     SDL_RenderCopy(ren, tex, null, null);
