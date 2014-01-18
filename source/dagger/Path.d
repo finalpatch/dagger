@@ -9,6 +9,8 @@ enum PathCmd {
 
 struct VertexT(T)
 {
+    alias T ValueType;
+
     PathCmd cmd;
     T x, y;
 

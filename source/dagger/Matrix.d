@@ -2,8 +2,10 @@ module dagger.Matrix;
 
 import std.math;
 import std.algorithm;
+import std.range;
+import std.string;
 
-private template Unroll(alias CODE, alias N, alias SEP="")
+template Unroll(alias CODE, alias N, alias SEP="")
 {
     enum t = replace(CODE, "%", "%1$d");
     enum Unroll = iota(N).map!(i => format(t, i)).join(SEP);
@@ -17,9 +19,9 @@ struct Vector(T, alias N)
     this (T...) (T args)
     {
         static if(args.length == 1)
-            mixin(Unroll!("v[%]=args[0];", N));
+            v[] = args[0];
         else static if(args.length == N)
-            mixin(Unroll!("v[%]=args[%];", N));
+            v[] = [args];
         else
             static assert("wrong number of arguments");
     }
@@ -30,21 +32,21 @@ struct Vector(T, alias N)
         mixin(Unroll!("t.v[%]=v[%] * (-1);", N));
         return t;
     }
-    Vector opBinary(string op)(T rhs) const
+    Vector opBinary(string op)(ref in T rhs) const
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
         Vector t;
         mixin(Unroll!("t.v[%]=v[%]"~op~"rhs;", N));
         return t;
     }
-    Vector opBinary(string op)(Vector rhs) const
+    Vector opBinary(string op)(ref in Vector rhs) const
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
         Vector t;
         mixin(Unroll!("t.v[%]=v[%]"~op~"rhs.v[%];", N));
         return t;
     }
-    ref Vector opOpAssign(string op)(Vector rhs)
+    ref Vector opOpAssign(string op)(ref in Vector rhs)
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
         mixin(Unroll!("v[%]"~op~"=rhs.v[%];", N));
@@ -69,15 +71,16 @@ struct Vector(T, alias N)
     T[N] v;
 }
 
-V.valtype dot(V)(V v1, V v2)
+V.valtype dot(V, V2)(ref in V v1, ref in V2 v2)
+    if( is(V.valtype == V2.valtype) )
 {
-    return mixin(Unroll!("v1.v[%]*v2.v[%]", V.size, "+"));
+    return mixin(Unroll!("v1[%]*v2[%]", V.size, "+"));
 }
-V.valtype magnitude(V)(V v)
+V.valtype magnitude(V)(ref in V v)
 {
     return sqrt(dot(v, v));
 }
-ref auto normalize(V)(V v)
+ref auto normalize(V)(ref in V v)
 {
     v.v[] /= magnitude(v);
     return v;
@@ -85,74 +88,77 @@ ref auto normalize(V)(V v)
 
 struct Matrix(T, alias N)
 {
-    this ()
-    {
-        foreach(i; 0..N) {v[i*N + i] = 1;}
-    }
     this (T...) (T args)
     {
         static if(args.length == 1)
             v[] = args[0];
-        else static if(args.length == N)
-            mixin(Unroll!("v[%]=args[%];", N));
+        else static if(args.length == N*N)
+            v[] = [args];
         else
             static assert("wrong number of arguments");
     }
     
-    struct RowVector
+    struct Slice
     {
-        int row;
+        const Matrix* mat;
+        int start;
+        int stride;
         enum size = N;
         alias T valtype;
-        this(size_t _row) { row = _row; }
-        T opIndex(size_t i) {return v[row * N + i];}
-    }
-    struct ColVector
-    {
-        int col;
-        enum size = N;
-        alias T valtype;
-        this(size_t _col) { col = _col; }
-        T opIndex(size_t i) {return v[i * N + col];}
+        this(const ref Matrix m, int _start, int _stride) { mat = &m; start=_start; stride=_stride; }
+        T opIndex(size_t i) const {return mat.v[i*stride + start ];}
     }
 
-    T opIndex(int row, int col)
+    Slice rowvec(int row) const
+    {
+        return Slice(this, row * N, 1);
+    }
+    Slice colvec(int col) const
+    {
+        return Slice(this, 0, N);
+    }
+    T opIndex(int row, int col) const
     {
         return v[row * N + col];
     }
-    Matrix opBinary(string op)(Matrix rhs) const
+    Matrix opBinary(string op)(ref in Matrix rhs) const
         if( op == "+" || op =="-")
     {
         Matrix t;
         mixin("t.v[]=v[]" ~ op ~"rhs.v[]");
         return t;
     }
-    ref Matrix opOpAssign(string op)(Matrix rhs)
-        if( op == "*")
-    {
-        mixin("v[]" ~ op ~"=rhs.v[]");
-        return this;
-    }
-    Matrix opBinary(string op)(Matrix rhs) const
+    Matrix opBinary(string op)(ref in Matrix rhs) const
         if( op == "*")
     {
         Matrix t;
         foreach(row; 0..N)
         {
-            RowVector rv(row);
+            auto rv = rowvec(row);
             foreach(col; 0..N)
             {
-                RowVector cv(col);
+                auto cv = rhs.colvec(col);
                 t.v[row * N + col] = dot(rv, cv);
             }
         }
         return t;
     }
-    ref Matrix opOpAssign(string op)(Matrix rhs)
+    ref Matrix opOpAssign(string op)(ref in Matrix rhs)
         if( op == "*")
     {
         this = this * rhs;
         return this;
+    }
+    Vector!(T,N) opBinary(string op)(ref in Vector!(T,N) rhs) const
+        if( op == "*")
+    {
+        Vector!(T,N) vec;
+        foreach(row; 0..N)
+        {
+            auto rv = rowvec(row);
+            vec.v[row] = dot(rv, rhs);
+        }
+        return vec;
     }
     T[N*N] v;
 }

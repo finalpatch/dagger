@@ -5,6 +5,8 @@ import dagger.PixelFormat;
 import dagger.Rasterizer;
 import dagger.Renderer;
 import dagger.Path;
+import dagger.Matrix;
+import dagger.Transform;
 
 immutable width     = 200;
 immutable height    = 200;
@@ -45,8 +47,13 @@ ubyte[] draw()
     path = [];
     path.moveTo(10, 10).lineTo(190,80).lineTo(100,190).lineTo(10,10);
 
+    auto m = Matrix!(double,3)(1,0,-10,
+                               0,1,-10,
+                               0,0,1);
+    auto newpath = transform(path, m);
+
     ras.reset();
-    ras.addPath(path);
+    ras.addPath(newpath);
 	auto ren = solidColorRenderer(surface, PixfmtRGB8(RGBA8(0,255,0)));
 	render(ren, ras);
 
