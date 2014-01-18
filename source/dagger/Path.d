@@ -35,4 +35,13 @@ ref P moveTo(P, T)(ref P path, T x, T y)
     return path;
 }
 
+void closePolygon(P)(ref P path)
+{
+    if (path.length > 2)
+    {
+        if (path[0].x != path[$-1].x || path[0].y != path[$-1].y)
+            path.lineTo(path[0].x, path[0].y);
+    }
+}
+
 alias VertexT!double Vertex;

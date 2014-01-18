@@ -93,7 +93,7 @@ private:
     {
         if (x != m_currentCell.x || y != m_currentCell.y)
         {
-            if (m_currentCell.cover && m_currentCell.area)
+            if (m_currentCell.cover)
             {
                 m_cells ~= m_currentCell;
             }

@@ -40,7 +40,7 @@ void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
     Cell[][] lines = new Cell[][ras.bottom - ras.top];
     auto cells = ras.finish();
     int prev = 0;
-    for(int i = 0; i < cells.length; ++i)
+    foreach(i; 0..cells.length)
     {
         if (cells[i].y == cells[prev].y)
             continue;
