@@ -63,7 +63,7 @@ public:
 package:
     Cell[] finish()
     {
-        if (m_currentCell.cover && m_currentCell.area)
+        if (m_currentCell.cover)
         {
             m_cells ~= m_currentCell;
         }
