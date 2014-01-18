@@ -3,8 +3,8 @@ module dagger.Renderer;
 import std.algorithm;
 import std.math;
 import std.traits;
-// import std.parallelism;
-// import std.range;
+import std.parallelism;
+import std.range;
 
 import dagger.Surface;
 import dagger.Rasterizer;
@@ -41,6 +41,8 @@ void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
 {
     Cell[][] lines = new Cell[][ras.bottom - ras.top];
     auto cells = ras.finish();
+    if (cells.length == 0)
+        return;
     int prev = 0;
     foreach(i; 0..cells.length)
     {
@@ -52,7 +54,7 @@ void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
     lines[cells[prev].y-ras.top] = cells[prev..$];
 
     foreach(y; ras.top..ras.bottom)
-    // foreach(y; parallel(iota(ras.top, ras.bottom)))
+    //foreach(y; parallel(iota(ras.top, ras.bottom)))
     {
         auto line = lines[y - ras.top];
         int cover = 0;

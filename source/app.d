@@ -12,8 +12,8 @@ import dagger.Path;
 import dagger.Matrix;
 import dagger.Transform;
 
-immutable width     = 400;
-immutable height    = 400;
+immutable width     = 800;
+immutable height    = 800;
 immutable bpp       = 3;
 
 ubyte[] draw()
@@ -24,27 +24,19 @@ ubyte[] draw()
     PixfmtRGB8 clr;
     uint cmd; // 0 move, 1 line
     Vertex[] path;
-    auto m = Matrix!(double,3)(1, tan(PI/10), 20,
-                               0, 1, 10,
+    auto m = Matrix!(double,3)(2, -tan(PI/10), 250,
+                               0, 2, 10,
                                0, 0, 1);
     foreach(line; lion.splitLines())
     {
         if (line[0] != 'M' && line[0] != 'L')
         {
-            if (path.length > 0)
-            {
-                ras.reset();
-                ras.addPath(transform(path, m));
-                auto ren = solidColorRenderer(surface, clr);
-                render(ren, ras);
-            }            
-            // color
+            // new color
             char[] s = line.dup;
             auto clrval = parse!uint(s,16);
             clr = PixfmtRGB8(RGBA8((clrval >> 16) & 0xff,
                                    (clrval >> 8) & 0xff,
                                    (clrval) & 0xff));
-            path = [];
             continue;
         }
         
@@ -69,13 +61,10 @@ ubyte[] draw()
                 }
             }
         }
-    }
-    if (path.length > 0)
-    {
-        ras.reset();
         ras.addPath(transform(path, m));
-        auto ren = solidColorRenderer(surface, clr);
-        render(ren, ras);
+        render(solidColorRenderer(surface, clr), ras);
+        ras.reset();
+        path = [];
     }
 
 	return surface.bytes();
