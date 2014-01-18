@@ -1,6 +1,8 @@
 module dagger.Path;
 
 import std.traits;
+import std.algorithm;
+import std.range;
 
 enum PathCmd {
     LineTo,
@@ -37,10 +39,19 @@ ref P moveTo(P, T)(ref P path, T x, T y)
 
 void closePolygon(P)(ref P path)
 {
-    if (path.length > 2)
+    // FIXME: set a flag for the rasterizer instead of searching
+    if (path.length <= 2)
+        return;
+    auto lastMove = retro(path).find!(a=>a.cmd==PathCmd.MoveTo);
+    if (!lastMove.empty())
     {
-        if (path[0].x != path[$-1].x || path[0].y != path[$-1].y)
-            path.lineTo(path[0].x, path[0].y);
+        auto v = lastMove.front();
+        if (v.x != path[$-1].x && v.y != path[$-1].y)
+        {
+            import std.stdio;
+            writefln("close polygon");
+            path.lineTo(v.x, v.y);
+        }
     }
 }
 

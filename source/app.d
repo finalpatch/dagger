@@ -60,9 +60,13 @@ ubyte[] draw()
                 auto x = coords[0].to!double;
                 auto y = coords[1].to!double;
                 if (cmd == 0)
+                {
                     path.moveTo(x,y);
+                }
                 else
+                {
                     path.lineTo(x,y);
+                }
             }
         }
     }
