@@ -20,10 +20,17 @@ public:
 		m_surface = surface;
 		m_pixel = pixel;
 	}
-	void renderSpan(int x, int y, CoverType cover, uint length)
+	final void renderSpan(int x, int y, CoverType cover, uint length)
 	{
-		foreach(ref p; m_surface[y][x .. x + length])
-			p.blend(m_pixel, cover);
+        if(cover.isOpaque())
+        {
+            m_surface[y][x .. x + length] = m_pixel;
+        }
+        else
+        {
+            foreach(ref p; m_surface[y][x .. x + length])
+                p.blend(m_pixel, cover);
+        }
 	}
 private:
 	SURFACE m_surface;
@@ -107,5 +114,17 @@ private T scaleAlpha(T, int Accuracy)(int a)
 			return cast(T)(min(T.max, a << (T.sizeof * 8 - Accuracy)));
 		else
 			return cast(T)(min(T.max, a >> (Accuracy - T.sizeof * 8)));
+    }
+}
+
+private bool isOpaque(T)(T val)
+{
+    static if (isFloatingPoint!T)
+    {
+        return abs(1.0-val) < T.epsilon;
+    }
+    else if (isIntegral!T)
+    {
+        return val == T.max;
     }
 }
