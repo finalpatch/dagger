@@ -13,6 +13,16 @@ struct Cell
     int area;
 }
 
+bool compareCells(ref in Cell a, ref in Cell b)
+{
+	if (a.y < b.y)
+		return true;
+	else if (a.y > b.y)
+		return false;
+	else
+		return a.x < b.x;
+}
+
 class RasterizerT(uint SubPixelAccuracy)
 {
 public:
@@ -67,14 +77,14 @@ package:
         {
             m_cells ~= m_currentCell;
         }
-        sortCells();
+        sort!compareCells(m_cells);
 		return m_cells;
     }
     
-    int left()  { return m_left;  }
-    int top()   { return m_top;   }
-    int right() { return m_right; }
-    int bottom(){ return m_bottom;}
+    final int left()   { return m_left;  }
+    final int top()    { return m_top;   }
+    final int right()  { return m_right; }
+    final int bottom() { return m_bottom;}
 private:
     Cell[] m_cells;
     Cell m_currentCell;
@@ -89,7 +99,7 @@ private:
         map_grid_spans!(cellWidth, callUpdateCell)(x1, y1, x2, y2);
     }
 	
-    void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
+    final void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
     {
         if (x != m_currentCell.x || y != m_currentCell.y)
         {
@@ -114,19 +124,6 @@ private:
         auto delta = fy2 - fy1;
         m_currentCell.cover += delta;
         m_currentCell.area += (fx1 + fx2) * delta;
-    }
-    void sortCells()
-    {
-        bool compareCells(in Cell a, in Cell b)
-        {
-            if (a.y < b.y)
-                return true;
-            else if (a.y > b.y)
-                return false;
-            else
-                return a.x < b.x;
-        }
-        sort!compareCells(m_cells);
     }
 }
 
