@@ -68,7 +68,10 @@ public:
         m_cells.clear();
         with(m_currentCell)
             x = y = cover = area = 0;
-        m_left = m_top = m_right = m_bottom = 0;
+        m_left = int.max;
+        m_top = int.max;
+        m_right = int.min;
+        m_bottom = int.min;
     }
 package:
     Cell[] finish()
