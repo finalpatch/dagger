@@ -55,7 +55,7 @@ public:
 	}
     void reset()
     {
-        m_cells = [];
+        m_cells.clear();
         with(m_currentCell)
             x = y = cover = area = 0;
         m_left = m_top = m_right = m_bottom = 0;

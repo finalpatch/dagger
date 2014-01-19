@@ -64,7 +64,7 @@ ubyte[] draw()
         ras.addPath(transform(path, m));
         render(solidColorRenderer(surface, clr), ras);
         ras.reset();
-        path = [];
+        path.clear();
     }
 
 	return surface.bytes();
