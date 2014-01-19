@@ -50,7 +50,7 @@ void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
     auto cells = ras.finish();
     if (cells.length == 0)
         return;
-    int prev = 0;
+    size_t prev = 0;
     foreach(i; 0..cells.length)
     {
         if (cells[i].y == cells[prev].y)
