@@ -1,8 +1,8 @@
-module dagger.Transform;
+module dagger.transform;
 
 import std.traits;
 import std.algorithm;
-import dagger.Matrix;
+import dagger.matrix;
 
 auto transform(PATH, MATRIX)(in PATH path, in MATRIX m)
 {

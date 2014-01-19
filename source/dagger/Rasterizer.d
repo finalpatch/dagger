@@ -1,9 +1,9 @@
-module dagger.Rasterizer;
+module dagger.rasterizer;
 
 import std.algorithm;
 import std.traits;
-import dagger.Basics;
-import dagger.Path;
+import dagger.basics;
+import dagger.path;
 
 struct Cell
 {

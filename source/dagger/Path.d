@@ -1,4 +1,4 @@
-module dagger.Path;
+module dagger.path;
 
 import std.traits;
 import std.algorithm;

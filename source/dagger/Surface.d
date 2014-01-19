@@ -1,4 +1,4 @@
-module dagger.Surface;
+module dagger.surface;
 
 import std.range;
 import std.traits;

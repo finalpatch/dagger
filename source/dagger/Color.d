@@ -1,8 +1,8 @@
-module dagger.Color;
+module dagger.color;
 
 import std.math;
 import std.traits;
-import dagger.Basics;
+import dagger.basics;
 
 struct Gray(T)
 {

@@ -1,7 +1,7 @@
-module dagger.PixelFormat;
+module dagger.pixelformat;
 
-public import dagger.Color;
-import dagger.Basics;
+public import dagger.color;
+import dagger.basics;
 
 struct PixfmtGray(T)
 {

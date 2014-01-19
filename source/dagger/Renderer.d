@@ -1,4 +1,4 @@
-module dagger.Renderer;
+module dagger.renderer;
 
 import std.algorithm;
 import std.math;
@@ -6,9 +6,9 @@ import std.traits;
 import std.parallelism;
 import std.range;
 
-import dagger.Surface;
-import dagger.Rasterizer;
-import dagger.PixelFormat;
+import dagger.surface;
+import dagger.rasterizer;
+import dagger.pixelformat;
 
 class SolidColorRenderer(SURFACE)
 {

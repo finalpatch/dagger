@@ -1,4 +1,4 @@
-module dagger.Basics;
+module dagger.basics;
 
 import std.traits;
 
