@@ -136,3 +136,5 @@ alias PixfmtRGB!(float,   ComponentOrderRGB)  PixfmtRGB32;
 alias PixfmtRGBA!(ubyte,  ComponentOrderRGBA) PixfmtRGBA8;
 alias PixfmtRGBA!(ushort, ComponentOrderRGBA) PixfmtRGBA16;
 alias PixfmtRGBA!(float,  ComponentOrderRGBA) PixfmtRGBA32;
+
+alias PixfmtRGBA!(ubyte,  ComponentOrderBGRA) PixfmtBGRA8;
