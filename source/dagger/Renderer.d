@@ -44,7 +44,7 @@ auto solidColorRenderer(SURFACE, PIXEL)(SURFACE surface, PIXEL pixel)
 
 // -----------------------------------------------------------------------------
 
-void renderScanline(RENDERER, RASTERIZER)(const(Cell)[] line, int y, RENDERER ren, RASTERIZER ras)
+void renderScanline(CELLS, RENDERER, RASTERIZER)(CELLS line, int y, RENDERER ren, RASTERIZER ras)
 {
 	int cover = 0;
 	while(line.length > 0)
@@ -88,6 +88,7 @@ void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
     auto cells = ras.finish();
     if (cells.length == 0)
         return;
+
     size_t prev = 0;
     foreach(i; 0..cells.length)
     {
