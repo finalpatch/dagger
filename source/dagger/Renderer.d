@@ -44,9 +44,47 @@ auto solidColorRenderer(SURFACE, PIXEL)(SURFACE surface, PIXEL pixel)
 
 // -----------------------------------------------------------------------------
 
-void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
+void renderScanline(RENDERER, RASTERIZER)(const(Cell)[] line, int y, RENDERER ren, RASTERIZER ras)
 {
-    Cell[][] lines = new Cell[][ras.bottom - ras.top];
+	int cover = 0;
+	while(line.length > 0)
+	{
+		int x = line[0].x;
+		int area = line[0].area;
+		cover += line[0].cover;
+
+		do
+		{
+			line = line[1..$];
+			if (line.length == 0 || line[0].x != x)
+				break;
+			area += line[0].area;
+			cover += line[0].cover;
+		} while (line.length > 0);
+
+		alias RENDERER.CoverType CoverType;
+		enum shift = RASTERIZER.subPixelAccuracy;
+		enum shift2 = shift + 1;
+
+		if (area)
+		{
+			auto a = scaleAlpha!(CoverType, shift)(abs((cover << shift2) - area ) >> shift2);
+			if (a)
+				ren.renderSpan(x,y, a, 1);
+			x++;
+		}
+
+		if (line.length > 0 && line[0].x > x)
+		{
+			auto a = scaleAlpha!(CoverType, shift)(abs(cover));
+			if (a)
+				ren.renderSpan(x,y, a, line[0].x-x);
+		}
+	}
+}
+
+void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
+{
     auto cells = ras.finish();
     if (cells.length == 0)
         return;
@@ -55,51 +93,10 @@ void render(RENDERER, RASTERIZER)(RENDERER renderer, RASTERIZER ras)
     {
         if (cells[i].y == cells[prev].y)
             continue;
-        lines[cells[prev].y-ras.top] = cells[prev..i];
+		renderScanline(cells[prev..i], cells[prev].y, ren, ras);
         prev = i;
     }
-    lines[cells[prev].y-ras.top] = cells[prev..$];
-
-    foreach(y; ras.top..ras.bottom)
-    //foreach(y; parallel(iota(ras.top, ras.bottom)))
-    {
-        auto line = lines[y - ras.top];
-        int cover = 0;
-        while(line.length > 0)
-        {
-            int x = line[0].x;
-            int area = line[0].area;
-            cover += line[0].cover;
-
-            do
-            {
-                line = line[1..$];
-                if (line.length == 0 || line[0].x != x)
-                    break;
-                area += line[0].area;
-                cover += line[0].cover;
-            } while (line.length > 0);
-
-			alias RENDERER.CoverType CoverType;
-			enum shift = RASTERIZER.subPixelAccuracy;
-			enum shift2 = shift + 1;
-
-            if (area)
-            {
-                auto a = scaleAlpha!(CoverType, shift)(abs((cover << shift2) - area ) >> shift2);
-                if (a)
-                    renderer.renderSpan(x,y, a, 1);
-                x++;
-            }
-
-            if (line.length > 0 && line[0].x > x)
-            {
-                auto a = scaleAlpha!(CoverType, shift)(abs(cover));
-                if (a)
-					renderer.renderSpan(x,y, a, line[0].x-x);
-            }
-        }
-    }
+	renderScanline(cells[prev..$], cells[prev].y, ren, ras);
 }
 
 private T scaleAlpha(T, int Accuracy)(int a)

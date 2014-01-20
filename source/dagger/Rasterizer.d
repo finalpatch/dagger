@@ -75,7 +75,7 @@ public:
         m_bottom = int.min;
     }
 package:
-    Cell[] finish()
+    const(Cell)[] finish()
     {
 		addCurrentCell();
 		auto cells = m_cells.data();
