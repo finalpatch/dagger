@@ -12,16 +12,16 @@ import dagger.path;
 import dagger.matrix;
 import dagger.transform;
 
+alias PixfmtRGB8 pixfmt;
 immutable width     = 800;
 immutable height    = 800;
-immutable bpp       = 3;
 
 ubyte[] draw()
 {
-    auto surface = new Surface!PixfmtRGB8(width, height);
+    auto surface = new Surface!pixfmt(width, height);
     surface.bytes()[] = 0xff;
     auto ras = new Rasterizer();
-    PixfmtRGB8 clr;
+    pixfmt clr;
     uint cmd; // 0 move, 1 line
     Vertex[] path;
     auto m = Matrix!(double,3)(2, -tan(PI/10), 250,
@@ -34,9 +34,9 @@ ubyte[] draw()
             // new color
             char[] s = line.dup;
             auto clrval = parse!uint(s,16);
-            clr = PixfmtRGB8(RGBA8((clrval >> 16) & 0xff,
-                                   (clrval >> 8) & 0xff,
-                                   (clrval) & 0xff));
+            clr = pixfmt(RGBA8((clrval >> 16) & 0xff,
+							   (clrval >> 8) & 0xff,
+							   (clrval) & 0xff));
             continue;
         }
         
@@ -99,7 +99,7 @@ int main()
     auto elapsed = Clock.currTime() - start;
     writefln("%s", elapsed);
 
-    SDL_UpdateTexture(tex, cast(const(SDL_Rect)*)null, cast(const void*)buffer, width * bpp);
+    SDL_UpdateTexture(tex, cast(const(SDL_Rect)*)null, cast(const void*)buffer, width * pixfmt.sizeof);
     SDL_RenderCopy(ren, tex, null, null);
     SDL_RenderPresent(ren);
 
