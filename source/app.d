@@ -16,17 +16,14 @@ alias PixfmtRGB8 pixfmt;
 immutable width     = 800;
 immutable height    = 800;
 
-ubyte[] draw()
+Vertex[][] g_paths;
+RGBA8[] g_colors;
+
+void parse_lion()
 {
-    auto surface = new Surface!pixfmt(width, height);
-    surface.bytes()[] = 0xff;
-    auto ras = new Rasterizer();
-    pixfmt clr;
+    RGBA8 clr;
     uint cmd; // 0 move, 1 line
     Vertex[] path;
-    auto m = Matrix!(double,3)(2, -tan(PI/10), 250,
-                               0, 2, 10,
-                               0, 0, 1);
     foreach(line; lion.splitLines())
     {
         if (line[0] != 'M' && line[0] != 'L')
@@ -34,9 +31,9 @@ ubyte[] draw()
             // new color
             char[] s = line.dup;
             auto clrval = parse!uint(s,16);
-            clr = pixfmt(RGBA8((clrval >> 16) & 0xff,
-							   (clrval >> 8) & 0xff,
-							   (clrval) & 0xff));
+            clr = RGBA8((clrval >> 16) & 0xff,
+                        (clrval >> 8) & 0xff,
+                        (clrval) & 0xff);
             continue;
         }
         
@@ -52,19 +49,34 @@ ubyte[] draw()
                 auto x = coords[0].to!double;
                 auto y = coords[1].to!double;
                 if (cmd == 0)
-                {
                     path.moveTo(x,y);
-                }
                 else
-                {
                     path.lineTo(x,y);
-                }
             }
         }
-        ras.addPath(transform(path, m));
-        render(solidColorRenderer(surface, clr), ras);
-        ras.reset();
+        g_paths ~= path;
+        g_colors ~= clr;
         path.clear();
+    }
+}
+
+ubyte[] draw()
+{
+    auto surface = new Surface!pixfmt(width, height);
+    surface.bytes()[] = 0xff;
+
+    auto ras = new Rasterizer();
+    auto m = Matrix!(double,3)(2, -tan(PI/10), 250,
+                               0, 2, 10,
+                               0, 0, 1);
+    auto ren = solidColorRenderer(surface);
+
+    foreach(i; 0..g_paths.length)
+    {
+        ras.reset();
+        ras.addPath(transform(g_paths[i], m));
+        ren.setColor(g_colors[i]);
+        render(ren, ras);
     }
 
 	return surface.bytes();
@@ -94,6 +106,7 @@ int main()
         return -1;
     }
 
+    parse_lion();
     auto start = Clock.currTime();
     ubyte[] buffer = draw();
     auto elapsed = Clock.currTime() - start;

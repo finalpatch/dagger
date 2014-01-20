@@ -15,10 +15,9 @@ class SolidColorRenderer(SURFACE)
 public:
 	alias SURFACE.valueType.ComponentType CoverType;
 
-	this(SURFACE surface, SURFACE.valueType pixel)
+	this(SURFACE surface)
 	{
 		m_surface = surface;
-		m_pixel = pixel;
 	}
 	final void renderSpan(int x, int y, CoverType cover, uint length)
 	{
@@ -32,14 +31,18 @@ public:
                 p.blend(m_pixel, cover);
         }
 	}
+    final void setColor(T)(T clr)
+    {
+        m_pixel = clr;
+    }
 private:
 	SURFACE m_surface;
 	SURFACE.valueType m_pixel;
 }
 
-auto solidColorRenderer(SURFACE, PIXEL)(SURFACE surface, PIXEL pixel)
+auto solidColorRenderer(SURFACE)(SURFACE surface)
 {
-	return new SolidColorRenderer!SURFACE(surface, pixel);
+	return new SolidColorRenderer!SURFACE(surface);
 }
 
 // -----------------------------------------------------------------------------
