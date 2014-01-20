@@ -79,7 +79,7 @@ package:
     {
 		addCurrentCell();
 		auto cells = m_cells.data();
-        sort!compareCells(cells);
+		multiSort!("a.y < b.y", "a.x < b.x")(cells);
 		return cells;
     }
     
