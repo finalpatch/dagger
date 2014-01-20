@@ -14,16 +14,6 @@ struct Cell
     int area;
 }
 
-bool compareCells(ref in Cell a, ref in Cell b)
-{
-	if (a.y < b.y)
-		return true;
-	else if (a.y > b.y)
-		return false;
-	else
-		return a.x < b.x;
-}
-
 class RasterizerT(uint SubPixelAccuracy)
 {
 public:

@@ -44,12 +44,13 @@ auto solidColorRenderer(SURFACE, PIXEL)(SURFACE surface, PIXEL pixel)
 
 // -----------------------------------------------------------------------------
 
-void renderScanline(CELLS, RENDERER, RASTERIZER)(CELLS line, int y, RENDERER ren, RASTERIZER ras)
+void renderScanline(CELLS, RENDERER, RASTERIZER)(CELLS line, RENDERER ren, RASTERIZER ras)
 {
 	int cover = 0;
 	while(line.length > 0)
 	{
 		int x = line[0].x;
+		int y = line[0].y;
 		int area = line[0].area;
 		cover += line[0].cover;
 
@@ -94,10 +95,10 @@ void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
     {
         if (cells[i].y == cells[prev].y)
             continue;
-		renderScanline(cells[prev..i], cells[prev].y, ren, ras);
+		renderScanline(cells[prev..i], ren, ras);
         prev = i;
     }
-	renderScanline(cells[prev..$], cells[prev].y, ren, ras);
+	renderScanline(cells[prev..$], ren, ras);
 }
 
 private T scaleAlpha(T, int Accuracy)(int a)
