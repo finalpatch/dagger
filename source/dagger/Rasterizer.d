@@ -2,6 +2,7 @@ module dagger.rasterizer;
 
 import std.algorithm;
 import std.traits;
+import std.array;
 import dagger.basics;
 import dagger.path;
 
@@ -76,12 +77,10 @@ public:
 package:
     Cell[] finish()
     {
-        if (m_currentCell.cover)
-        {
-            m_cells ~= m_currentCell;
-        }
-        sort!compareCells(m_cells);
-		return m_cells;
+		addCurrentCell();
+		auto cells = m_cells.data();
+        sort!compareCells(cells);
+		return cells;
     }
     
     final int left()   { return m_left;  }
@@ -89,7 +88,7 @@ package:
     final int right()  { return m_right; }
     final int bottom() { return m_bottom;}
 private:
-    Cell[] m_cells;
+    Appender!(Cell[]) m_cells;
     Cell m_currentCell;
     int m_left, m_top, m_right, m_bottom;
 
@@ -100,34 +99,38 @@ private:
             this.updateCell(x, y, fx1, fy1, fx2, fy2);
         }
         map_grid_spans!(cellWidth, callUpdateCell)(x1, y1, x2, y2);
+		x1 >>= SubPixelAccuracy;
+		y1 >>= SubPixelAccuracy;
+		x2 >>= SubPixelAccuracy;
+		y2 >>= SubPixelAccuracy;
+		m_left   = min(x1, x2, m_left);
+		m_top    = min(y1, y2, m_top);		
+		m_right  = max(x1, x2, m_right);
+		m_bottom = max(y1, y2, m_bottom);
     }
 	
-    final void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
+    void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
     {
         if (x != m_currentCell.x || y != m_currentCell.y)
         {
-            if (m_currentCell.cover)
-            {
-                m_cells ~= m_currentCell;
-            }
+			addCurrentCell();
             m_currentCell.x = x;
             m_currentCell.y = y;
             m_currentCell.cover = 0;
             m_currentCell.area = 0;
-            
-            if (x < m_left)
-                m_left = x;
-            else if (x > m_right)
-                m_right = x;
-            if (y < m_top)
-                m_top = y;
-            else if (y > m_bottom)
-                m_bottom = y;
         }
         auto delta = fy2 - fy1;
         m_currentCell.cover += delta;
         m_currentCell.area += (fx1 + fx2) * delta;
     }
+
+	void addCurrentCell()
+	{
+		if (m_currentCell.cover)
+		{
+			m_cells.put(m_currentCell);
+		}
+	}
 }
 
 alias RasterizerT!8 Rasterizer;
