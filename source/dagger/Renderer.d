@@ -96,10 +96,11 @@ void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
     size_t prev = 0;
     foreach(i; 0..cells.length)
     {
-        if (cells[i].y == cells[prev].y)
-            continue;
-		renderScanline(cells[prev..i], ren, ras);
-        prev = i;
+        if (cells[i].y != cells[prev].y)
+        {
+            renderScanline(cells[prev..i], ren, ras);
+            prev = i;
+        }
     }
 	renderScanline(cells[prev..$], ren, ras);
 }

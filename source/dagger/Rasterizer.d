@@ -84,6 +84,9 @@ private:
 
     void addLine(int x1, int y1, int x2, int y2)
     {
+        // horizontal line
+        if (y1 == y2)
+            return;
         void callUpdateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
         {
             this.updateCell(x, y, fx1, fy1, fx2, fy2);
