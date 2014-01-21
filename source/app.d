@@ -22,27 +22,6 @@ alias Polygon[] PolygonGroup;
 PolygonGroup[] g_polygons;
 RGBA8[] g_colors;
 
-double polygonArea(Vertex[] polygon)
-{
-	double area = 0;
-	foreach(i; 0..polygon.length)
-	{
-		auto x1 = polygon[i].x;
-		auto y1 = polygon[i].y;
-		auto x2 = polygon[(i+1)%$].x;
-		auto y2 = polygon[(i+1)%$].y;
-		area += x1 * y2 - y1 * x2;
-	}
-	return area;
-}
-
-void fixPolygon(Vertex[] polygon)
-{
-	auto area = polygonArea(polygon);
-	if (area > 0)
-		reverse(polygon);
-}
-
 void parse_lion()
 {
     RGBA8 clr;	
@@ -79,7 +58,7 @@ void parse_lion()
 				polygon.addVertex(x,y);
             }
         }
-		fixPolygon(polygon);
+		fixPolygonOrientation(polygon);
 		group ~= polygon;
     }
 	g_colors ~= clr;
