@@ -89,20 +89,8 @@ void renderScanline(CELLS, RENDERER, RASTERIZER)(CELLS line, RENDERER ren, RASTE
 
 void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
 {
-    auto cells = ras.finish();
-    if (cells.length == 0)
-        return;
-
-    size_t prev = 0;
-    foreach(i; 0..cells.length)
-    {
-        if (cells[i].y != cells[prev].y)
-        {
-            renderScanline(cells[prev..i], ren, ras);
-            prev = i;
-        }
-    }
-	renderScanline(cells[prev..$], ren, ras);
+	foreach(line; ras.finish())
+		renderScanline(line, ren, ras);
 }
 
 private T scaleAlpha(T, int Accuracy)(int a)

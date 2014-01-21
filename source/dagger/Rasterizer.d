@@ -14,7 +14,38 @@ struct Cell
     int area;
 }
 
-class RasterizerT(uint SubPixelAccuracy)
+struct CellStore(size_t ChunkSize)
+{
+	Appender!(Cell[])[][] m_chunks = [new Appender!(Cell[])[ChunkSize]];
+	void clear()
+	{
+		foreach(chunk; m_chunks)
+		{
+			foreach(l; chunk)
+				l.clear();
+		}
+	}
+	void put(ref in Cell c)
+	{
+		auto chunkId = c.y / ChunkSize;
+		auto idxInChunk = c.y - chunkId * ChunkSize;
+		if (chunkId >= m_chunks.length)
+			m_chunks.length = chunkId * 2;
+		if (m_chunks[chunkId].empty)
+			m_chunks[chunkId] = new Appender!(Cell[])[ChunkSize];
+		m_chunks[chunkId][idxInChunk].put(c);
+	}
+	Cell[] getline(size_t y)
+	{
+		auto chunkId = y / ChunkSize;
+		auto idxInChunk = y - chunkId * ChunkSize;
+		if (chunkId >= m_chunks.length || m_chunks[chunkId].empty)
+			return [];
+		return m_chunks[chunkId][idxInChunk].data();
+	}
+}
+
+class RasterizerT(uint SubPixelAccuracy, uint CellStoreChunkSize = 16)
 {
 public:
 	enum cellWidth = 1 << subPixelAccuracy;
@@ -56,7 +87,8 @@ public:
 	}
     void reset()
     {
-        m_cells.clear();
+		m_cells.clear();
+
         with(m_currentCell)
             x = y = cover = area = 0;
         m_left = int.max;
@@ -65,12 +97,16 @@ public:
         m_bottom = int.min;
     }
 package:
-    const(Cell)[] finish()
+    const(Cell)[][] finish()
     {
 		addCurrentCell();
-		auto cells = m_cells.data();
-		multiSort!("a.y < b.y", "a.x < b.x")(cells);
-		return cells;
+		auto cells = new Cell[][bottom()-top()+1];
+		foreach(row; 0..(bottom()-top()+1))
+		{
+			cells[row] = m_cells.getline(row+top());
+			sort!("a.x < b.x")(cells[row]);
+		}
+		return cast(const(Cell)[][])cells;
     }
     
     final int left()   { return m_left;  }
@@ -78,7 +114,7 @@ package:
     final int right()  { return m_right; }
     final int bottom() { return m_bottom;}
 private:
-    Appender!(Cell[]) m_cells;
+    CellStore!CellStoreChunkSize m_cells;
     Cell m_currentCell;
     int m_left, m_top, m_right, m_bottom;
 
