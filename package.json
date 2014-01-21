@@ -4,6 +4,7 @@
 	"description": "A 2D graphics library.",
 	"copyright": "Copyright © 2014, finalpatch",
 	"authors": ["finalpatch"],
+	"license": "BSL-1.0",
 	"dependencies": {
 	}
 }
