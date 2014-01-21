@@ -95,12 +95,12 @@ ubyte[] draw()
     auto ren = solidColorRenderer(surface);
 
     
-    auto m2 = Matrix!(double,3)(2, 0, 400,
-                                0, 2, 400,
-                                0, 0, 1);
-    auto m0 = Matrix!(double,3)(1, 0, -100,
-                                0, 1, -200,
-                                0, 0, 1);
+    auto m2 = Matrix!(double,3)(2, 0, 0,
+                                0, 2, 0,
+                                400, 400, 1);
+    auto m0 = Matrix!(double,3)(1, 0, 0,
+                                0, 1, 0,
+                                -100, -200, 1);
     foreach(a; 0..180)
     {
         auto r = PI/180*a*2;
@@ -108,12 +108,12 @@ ubyte[] draw()
         auto cos_r = cos(r);
         foreach(i; 0..g_polygons.length)
         {
-            auto m1 = Matrix!(double,3)(cos_r, -sin_r, 0,
-                                        sin_r, cos_r, 0,
+            auto m1 = Matrix!(double,3)(cos_r, sin_r, 0,
+                                        -sin_r, cos_r, 0,
                                         0, 0, 1);
             ras.reset();
             foreach(polygon; g_polygons[i])
-                ras.addPath(polygon.trans(m2*m1*m0).clip(0, 0, width, height));
+                ras.addPath(polygon.trans(m0*m1*m2).clip(0, 0, width, height));
             ren.color(g_colors[i]);
             render(ren, ras);
         }

@@ -11,7 +11,7 @@ auto trans(PATH, MATRIX)(in PATH path, in MATRIX m)
     auto tr(VertexType vertex)
     {
         auto vec= Vector!(ValueType,3)(vertex.x, vertex.y, 1);
-        vec = m * vec;
+        vec *= m;
         // change x and y, keep everything else
         vertex.x = vec.x/vec.z;
         vertex.y = vec.y/vec.z;

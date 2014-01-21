@@ -53,6 +53,27 @@ struct Vector(T, alias N)
         return this;
     }
 
+    // vec *= mat
+    ref Vector opOpAssign(string op)(auto ref in Matrix!(T,N) rhs)
+        if( op == "*")
+    {
+        Vector vec = this;
+        foreach(i; 0..N)
+        {
+            auto cv = rhs.colvec(i);
+            v[i] = dot(vec, cv);
+        }
+        return this;
+    }
+    // vec * mat
+    Vector opBinary(string op)(auto ref in Matrix!(T,N) rhs) const
+        if( op == "*")
+    {
+        Vector v = this;
+        v *= rhs;
+        return vec;
+    }
+
     static if (N >= 1)
     {
         T x() { return v[0]; }
@@ -131,22 +152,23 @@ struct Matrix(T, alias N)
     Matrix opBinary(string op)(auto ref in Matrix rhs) const
         if( op == "*")
     {
-        Matrix t;
-        foreach(row; 0..N)
-        {
-            auto rv = rowvec(row);
-            foreach(col; 0..N)
-            {
-                auto cv = rhs.colvec(col);
-                t.v[row * N + col] = dot(rv, cv);
-            }
-        }
+        Matrix t = this;
+        t *= rhs;
         return t;
     }
     ref Matrix opOpAssign(string op)(auto ref in Matrix rhs)
         if( op == "*")
     {
-        this = this * rhs;
+        Matrix t = this;
+        foreach(row; 0..N)
+        {
+            auto rv = t.rowvec(row);
+            foreach(col; 0..N)
+            {
+                auto cv = rhs.colvec(col);
+                v[row * N + col] = dot(rv, cv);
+            }
+        }
         return this;
     }
     Vector!(T,N) opBinary(string op)(auto ref in Vector!(T,N) rhs) const
