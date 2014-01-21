@@ -19,8 +19,6 @@ struct VertexT(T)
 ref P addVertex(P, T)(ref P path, T x, T y)
 {
     alias ForeachType!P VertexType;
-	if (path.length > 0 && path[$-1].x == x && path[$-1].y == y)
-		return path;
     path ~= VertexType(x, y);
     return path;
 }

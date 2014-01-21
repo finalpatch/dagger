@@ -68,7 +68,7 @@ void parse_lion()
                         (clrval >> 8) & 0xff,
                         (clrval) & 0xff);
             continue;
-        }        
+        }
         foreach (word; line.split())
         {
             if (!(word == "M" || word == "L"))
@@ -101,7 +101,7 @@ ubyte[] draw()
     {
         ras.reset();
 		foreach(polygon; g_polygons[i])
-			ras.addPolygon(transform(polygon, m));
+			ras.addPath(transform(polygon, m));
         ren.setColor(g_colors[i]);
         render(ren, ras);
     }

@@ -58,16 +58,19 @@ public:
         m_right = int.min;
         m_bottom = int.min;
     }
-    void addPolygon(T)(T path)
+    void addPath(T)(T path, bool closePolygon = true)
     {
 		if (path.length == 0)
 			return;
-
         Vertex prev = path[0];
         foreach(v; path[1..$])
         {
 			line(prev.x, prev.y, v.x, v.y);
             prev = v;
+        }
+        if (closePolygon && (path[$-1].x != path[0].x || path[$-1].y != path[0].y))
+        {
+            line(path[$-1].x, path[$-1].y, path[0].x, path[0].y);
         }
     }
     void line(T)(T x1, T y1, T x2, T y2)
