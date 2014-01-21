@@ -1,8 +1,8 @@
 {
 	"name": "dagger",
-	"description": "A minimal D application.",
-	"copyright": "Copyright © 2014, fengl",
-	"authors": ["fengl"],
+	"description": "A 2D graphics library.",
+	"copyright": "Copyright © 2014, finalpatch",
+	"authors": ["finalpatch"],
 	"dependencies": {
 	    "derelict-sdl2" : "~master",
 	}
