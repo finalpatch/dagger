@@ -96,16 +96,15 @@ public:
         m_bottom = int.min;
     }
 package:
-    const(Cell)[][] finish()
+    Cell[][] finish()
     {
 		addCurrentCell();
 		auto cells = new Cell[][bottom()-top()+1];
 		foreach(row; 0..(bottom()-top()+1))
 		{
 			cells[row] = m_cells.getline(row+top());
-			sort!("a.x < b.x")(cells[row]);
 		}
-		return cast(const(Cell)[][])cells;
+		return cells;
     }
     
     final int left()   { return m_left;  }

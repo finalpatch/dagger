@@ -89,8 +89,11 @@ void renderScanline(CELLS, RENDERER, RASTERIZER)(CELLS line, RENDERER ren, RASTE
 
 void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
 {
-	foreach(line; ras.finish())
+	foreach(line; parallel(ras.finish()))
+    {
+        sort!("a.x < b.x")(line);
 		renderScanline(line, ren, ras);
+    }
 }
 
 private T scaleAlpha(T, int Accuracy)(int a)
