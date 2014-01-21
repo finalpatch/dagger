@@ -31,9 +31,13 @@ public:
                 p.blend(m_pixel, cover);
         }
 	}
-    final void setColor(T)(T clr)
+    final void color(T)(T clr)
     {
         m_pixel = clr;
+    }
+    final SURFACE surface()
+    {
+        return m_surface;
     }
 private:
 	SURFACE m_surface;

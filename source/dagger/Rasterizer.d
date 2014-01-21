@@ -65,23 +65,23 @@ public:
         Vertex prev = path[0];
         foreach(v; path[1..$])
         {
-			line(prev.x, prev.y, v.x, v.y);
+			addLine(prev.x, prev.y, v.x, v.y);
             prev = v;
         }
         if (closePolygon && (path[$-1].x != path[0].x || path[$-1].y != path[0].y))
         {
-            line(path[$-1].x, path[$-1].y, path[0].x, path[0].y);
+            addLine(path[$-1].x, path[$-1].y, path[0].x, path[0].y);
         }
     }
-    void line(T)(T x1, T y1, T x2, T y2)
+    void addLine(T)(T x1, T y1, T x2, T y2)
 	{
         static if (isFloatingPoint!T)
         {
-            addLine(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
+            subPixelAddLine(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
         }
         else if (isIntegral!T)
         {
-            addLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
+            subPixelAddLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
         }
 	}
     void reset()
@@ -116,7 +116,7 @@ private:
     Cell m_currentCell;
     int m_left, m_top, m_right, m_bottom;
 
-    void addLine(int x1, int y1, int x2, int y2)
+    void subPixelAddLine(int x1, int y1, int x2, int y2)
     {
         // horizontal line
         if (y1 == y2)

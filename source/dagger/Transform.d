@@ -19,3 +19,16 @@ auto transform(PATH, MATRIX)(in PATH path, in MATRIX m)
     }
     return map!transformVertex(path);
 }
+
+auto clip(PATH, T1,T2)(PATH path, T1 x1, T1 y1, T2 x2, T2 y2)
+{
+    alias ForeachType!PATH VertexType;
+    alias VertexType.ValueType ValueType;
+    auto transformVertex(VertexType vertex)
+    {
+        vertex.x = min(max(vertex.x, x1), x2);
+        vertex.y = min(max(vertex.y, y1), y2);
+        return vertex;
+    }
+    return map!transformVertex(path);
+}

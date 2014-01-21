@@ -92,18 +92,31 @@ ubyte[] draw()
     surface.bytes()[] = 0xff;
 
     auto ras = new Rasterizer();
-    auto m = Matrix!(double,3)(2, -tan(PI/10), 250,
-                               0, 2, 10,
-                               0, 0, 1);
     auto ren = solidColorRenderer(surface);
 
-    foreach(i; 0..g_polygons.length)
+    
+    auto m2 = Matrix!(double,3)(2, 0, 400,
+                                0, 2, 400,
+                                0, 0, 1);
+    auto m0 = Matrix!(double,3)(1, 0, -100,
+                                0, 1, -200,
+                                0, 0, 1);
+    foreach(a; 0..360)
     {
-        ras.reset();
-		foreach(polygon; g_polygons[i])
-			ras.addPath(transform(polygon, m));
-        ren.setColor(g_colors[i]);
-        render(ren, ras);
+        auto r = PI/180*a;
+        auto sin_r = sin(r);
+        auto cos_r = cos(r);
+        foreach(i; 0..g_polygons.length)
+        {
+            auto m1 = Matrix!(double,3)(cos_r, -sin_r, 0,
+                                        sin_r, cos_r, 0,
+                                        0, 0, 1);
+            ras.reset();
+            foreach(polygon; g_polygons[i])
+                ras.addPath(polygon.transform(m2*m1*m0).clip(0, 0, width, height));
+            ren.color(g_colors[i]);
+            render(ren, ras);
+        }
     }
 
 	return surface.bytes();

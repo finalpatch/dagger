@@ -54,6 +54,9 @@ public:
         return cast(ubyte[])m_buf;
     }
 
+    uint width()  const { return m_width;  }
+    uint height() const { return m_height; }
+
 private:
 	T[]   m_buf;
     T[][] m_rowCache;
