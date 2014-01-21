@@ -100,22 +100,22 @@ struct Matrix(T, alias N)
     
     struct Slice
     {
-        const Matrix* mat;
+        const(T)[] mat;
         int start;
         int stride;
         enum size = N;
         alias T valtype;
-        this(const ref Matrix m, int _start, int _stride) { mat = &m; start=_start; stride=_stride; }
-        T opIndex(size_t i) const {return mat.v[i*stride + start ];}
+        this(const(T)[] m, int _start, int _stride) { mat = m; start=_start; stride=_stride; }
+        T opIndex(size_t i) const {return mat[i*stride + start];}
     }
 
     Slice rowvec(int row) const
     {
-        return Slice(this, row * N, 1);
+        return Slice(v, row * N, 1);
     }
     Slice colvec(int col) const
     {
-        return Slice(this, 0, N);
+        return Slice(v, col, N);
     }
     T opIndex(int row, int col) const
     {
