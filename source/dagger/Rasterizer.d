@@ -16,7 +16,7 @@ struct Cell
 
 struct CellStore(size_t ChunkSize)
 {
-	Appender!(Cell[])[][] m_chunks = [new Appender!(Cell[])[ChunkSize]];
+	Appender!(Cell[])[][] m_chunks;
 	void clear()
 	{
 		foreach(chunk; m_chunks)
@@ -30,7 +30,7 @@ struct CellStore(size_t ChunkSize)
 		auto chunkId = c.y / ChunkSize;
 		auto idxInChunk = c.y - chunkId * ChunkSize;
 		if (chunkId >= m_chunks.length)
-			m_chunks.length = chunkId * 2;
+			m_chunks.length = chunkId * 2 + 1;
 		if (m_chunks[chunkId].empty)
 			m_chunks[chunkId] = new Appender!(Cell[])[ChunkSize];
 		m_chunks[chunkId][idxInChunk].put(c);
