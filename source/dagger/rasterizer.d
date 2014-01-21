@@ -6,45 +6,6 @@ import std.array;
 import dagger.basics;
 import dagger.path;
 
-struct Cell
-{
-    int x;
-    int y;
-    int cover;
-    int area;
-}
-
-struct CellStore(size_t ChunkSize)
-{
-	Appender!(Cell[])[][] m_chunks;
-	void clear()
-	{
-		foreach(chunk; m_chunks)
-		{
-			foreach(l; chunk)
-				l.clear();
-		}
-	}
-	void put(ref in Cell c)
-	{
-		auto chunkId = c.y / ChunkSize;
-		auto idxInChunk = c.y - chunkId * ChunkSize;
-		if (chunkId >= m_chunks.length)
-			m_chunks.length = chunkId * 2 + 1;
-		if (m_chunks[chunkId].empty)
-			m_chunks[chunkId] = new Appender!(Cell[])[ChunkSize];
-		m_chunks[chunkId][idxInChunk].put(c);
-	}
-	Cell[] getline(size_t y)
-	{
-		auto chunkId = y / ChunkSize;
-		auto idxInChunk = y - chunkId * ChunkSize;
-		if (chunkId >= m_chunks.length || m_chunks[chunkId].empty)
-			return [];
-		return m_chunks[chunkId][idxInChunk].data();
-	}
-}
-
 class RasterizerT(uint SubPixelAccuracy, uint CellStoreChunkSize = 16)
 {
 public:
@@ -164,70 +125,116 @@ alias RasterizerT!8 Rasterizer;
 
 // -----------------------------------------------------------------------------
 
-private void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int b2)
+package
 {
-	auto b1_m = b1 / cellWidth;
-	auto b1_f = b1 % cellWidth;
-	auto b2_m = b2 / cellWidth;
-	auto b2_f = b2 % cellWidth;
-	if (b1_m == b2_m)
+	struct Cell
 	{
-		F(b1_m, a1, b1_f, a2, b2_f);
+		int x;
+		int y;
+		int cover;
+		int area;
 	}
-	else
+
+	struct CellStore(size_t ChunkSize)
 	{
-		auto b_m = b1_m;
-		auto delta_a = a2 - a1;
-		auto delta_b = b2 - b1;
-		auto b_incr = b2 > b1 ? 1 : (b2 < b1 ? -1 : 0);
-		auto a_incr = a2 > a1 ? 1 : (a2 < a1 ? -1 : 0);
-		int from_boundary, to_boundary, first;
-		if (b2 > b1)
+		Appender!(Cell[])[][] m_chunks;
+		void clear()
 		{
-			from_boundary = 0;
-			to_boundary = cellWidth;
-			first = cellWidth - b1_f;
-		}
-		else
-		{
-			delta_b = -delta_b;
-			from_boundary = cellWidth;
-			to_boundary = 0;
-			first = b1_f;
-		}
-		auto a  = (first * delta_a) / delta_b;
-		auto ma = (first * delta_a) % delta_b;
-		a += a1;
-		F(b1_m, a1, b1_f, a, to_boundary);
-		b_m += b_incr;
-		auto step = (cellWidth * delta_a) / delta_b;
-		auto mod  = (cellWidth * delta_a) % delta_b;
-		while (b_m != b2_m)
-		{
-			auto prev_a = a;
-			a += step;
-			ma += mod;
-			if (ma * a_incr >= delta_b)
+			foreach(chunk; m_chunks)
 			{
-				a += a_incr;
-				ma -= delta_b * a_incr;
+				foreach(l; chunk)
+					l.clear();
 			}
-			F(b_m, prev_a, from_boundary, a, to_boundary);
-			b_m += b_incr;
 		}
-		F(b_m, a, from_boundary, a2, b2_f);
+		void put(ref in Cell c)
+		{
+			auto chunkId = c.y / ChunkSize;
+			auto idxInChunk = c.y - chunkId * ChunkSize;
+			if (chunkId >= m_chunks.length)
+				m_chunks.length = chunkId * 2 + 1;
+			if (m_chunks[chunkId].empty)
+				m_chunks[chunkId] = new Appender!(Cell[])[ChunkSize];
+			m_chunks[chunkId][idxInChunk].put(c);
+		}
+		Cell[] getline(size_t y)
+		{
+			auto chunkId = y / ChunkSize;
+			auto idxInChunk = y - chunkId * ChunkSize;
+			if (chunkId >= m_chunks.length || m_chunks[chunkId].empty)
+				return [];
+			return m_chunks[chunkId][idxInChunk].data();
+		}
 	}
 }
 
-private void map_grid_spans(int cellWidth, alias F)(int x1, int y1, int x2, int y2)
+private
 {
-	void hline(int y_m, int x1, int y1_f, int x2, int y2_f)
+	void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int b2)
 	{
-		void pixel(int x_m, int y1_f, int x1_f, int y2_f, int x2_f)
+		auto b1_m = b1 / cellWidth;
+		auto b1_f = b1 % cellWidth;
+		auto b2_m = b2 / cellWidth;
+		auto b2_f = b2 % cellWidth;
+		if (b1_m == b2_m)
 		{
-			F(x_m, y_m, x1_f, y1_f, x2_f, y2_f);
+			F(b1_m, a1, b1_f, a2, b2_f);
 		}
-		map_line_spans!(cellWidth, pixel)(y1_f, x1, y2_f, x2);
+		else
+		{
+			auto b_m = b1_m;
+			auto delta_a = a2 - a1;
+			auto delta_b = b2 - b1;
+			auto b_incr = b2 > b1 ? 1 : (b2 < b1 ? -1 : 0);
+			auto a_incr = a2 > a1 ? 1 : (a2 < a1 ? -1 : 0);
+			int from_boundary, to_boundary, first;
+			if (b2 > b1)
+			{
+				from_boundary = 0;
+				to_boundary = cellWidth;
+				first = cellWidth - b1_f;
+			}
+			else
+			{
+				delta_b = -delta_b;
+				from_boundary = cellWidth;
+				to_boundary = 0;
+				first = b1_f;
+			}
+			auto a  = (first * delta_a) / delta_b;
+			auto ma = (first * delta_a) % delta_b;
+			a += a1;
+			F(b1_m, a1, b1_f, a, to_boundary);
+			b_m += b_incr;
+			auto step = (cellWidth * delta_a) / delta_b;
+			auto mod  = (cellWidth * delta_a) % delta_b;
+			while (b_m != b2_m)
+			{
+				auto prev_a = a;
+				a += step;
+				ma += mod;
+				if (ma * a_incr >= delta_b)
+				{
+					a += a_incr;
+					ma -= delta_b * a_incr;
+				}
+				F(b_m, prev_a, from_boundary, a, to_boundary);
+				b_m += b_incr;
+			}
+			F(b_m, a, from_boundary, a2, b2_f);
+		}
 	}
-	map_line_spans!(cellWidth, hline)(x1, y1, x2, y2);
+
+	void map_grid_spans(int cellWidth, alias F)(int x1, int y1, int x2, int y2)
+	{
+		void hline(int y_m, int x1, int y1_f, int x2, int y2_f)
+		{
+			void pixel(int x_m, int y1_f, int x1_f, int y2_f, int x2_f)
+			{
+				F(x_m, y_m, x1_f, y1_f, x2_f, y2_f);
+			}
+			map_line_spans!(cellWidth, pixel)(y1_f, x1, y2_f, x2);
+		}
+		map_line_spans!(cellWidth, hline)(x1, y1, x2, y2);
+	}
+
 }

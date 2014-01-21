@@ -2,6 +2,11 @@ module dagger.basics;
 
 import std.traits;
 
+int  iround(double x) { return cast(int)((x < 0.0) ? x - 0.5 : x + 0.5); }
+uint uround(double x) { return cast(uint)(x + 0.5); }
+
+// -----------------------------------------------------------------------------
+
 private template CalcType(T)
 {
     static if (isSigned!T)
@@ -20,8 +25,7 @@ private template CalcType(T)
     }
 }
 
-int  iround(double x) { return cast(int)((x < 0.0) ? x - 0.5 : x + 0.5); }
-uint uround(double x) { return cast(uint)(x + 0.5); }
+// -----------------------------------------------------------------------------
 
 T lerp(T)(T p, T q, T a)
 {

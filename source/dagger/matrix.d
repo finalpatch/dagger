@@ -5,12 +5,6 @@ import std.algorithm;
 import std.range;
 import std.string;
 
-template Unroll(alias CODE, alias N, alias SEP="")
-{
-    enum t = replace(CODE, "%", "%1$d");
-    enum Unroll = iota(N).map!(i => format(t, i)).join(SEP);
-}
-
 struct Vector(T, alias N)
 {
     enum size = N;
@@ -92,6 +86,8 @@ struct Vector(T, alias N)
     T[N] v;
 }
 
+// -----------------------------------------------------------------------------
+
 V.valtype dot(V, V2)(auto ref in V v1, auto ref in V2 v2)
     if( is(V.valtype == V2.valtype) )
 {
@@ -106,6 +102,8 @@ ref auto normalize(V)(auto ref in V v)
     v.v[] /= magnitude(v);
     return v;
 }
+
+// -----------------------------------------------------------------------------
 
 struct Matrix(T, alias N)
 {
@@ -183,4 +181,12 @@ struct Matrix(T, alias N)
         return vec;
     }
     T[N*N] v;
+}
+
+// -----------------------------------------------------------------------------
+
+protected template Unroll(alias CODE, alias N, alias SEP="")
+{
+	enum t = replace(CODE, "%", "%1$d");
+	enum Unroll = iota(N).map!(i => format(t, i)).join(SEP);
 }

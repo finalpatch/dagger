@@ -16,6 +16,8 @@ struct VertexT(T)
     }
 }
 
+alias VertexT!double Vertex;
+
 ref P addVertex(P, T)(ref P path, T x, T y)
 {
     alias ForeachType!P VertexType;
@@ -25,7 +27,7 @@ ref P addVertex(P, T)(ref P path, T x, T y)
     return path;
 }
 
-alias VertexT!double Vertex;
+// -----------------------------------------------------------------------------
 
 enum PolygonOrientation { CW, CCW }
 
