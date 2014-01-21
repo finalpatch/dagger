@@ -2,6 +2,7 @@ import std.stdio;
 import std.string;
 import std.conv;
 import std.math;
+import std.algorithm;
 import std.datetime;
 import derelict.sdl2.sdl;
 import dagger.surface;
@@ -19,15 +20,55 @@ immutable height    = 800;
 Vertex[][] g_paths;
 RGBA8[] g_colors;
 
+double polygonArea(Vertex[] path)
+{
+	double area = 0;
+	foreach(i; 0..path.length)
+	{
+		auto x1 = path[i].x;
+		auto y1 = path[i].y;
+		auto x2 = path[(i+1)%$].x;
+		auto y2 = path[(i+1)%$].y;
+		area += x1 * y2 - y1 * x2;
+	}
+	return area;
+}
+
+void fixPolygons(Vertex[] polygons)
+{
+	while(polygons.length > 0)
+	{
+		auto rest = find!(a=>a.cmd==PathCmd.MoveTo)(polygons[1..$]);
+		auto polygonPath = polygons[0..$-rest.length];
+		polygons = rest;
+		auto area = polygonArea(polygonPath);
+		if (area > 0)
+			reverse(polygonPath[1..$-1]);
+	}
+}
+
 void parse_lion()
 {
     RGBA8 clr;
     uint cmd; // 0 move, 1 line
     Vertex[] path;
+
+	void addPath()
+	{
+		if (path.length > 0)
+		{
+			fixPolygons(path);
+			g_paths ~= path;
+			g_colors ~= clr;
+			path.clear();
+		}
+	}
+
     foreach(line; lion.splitLines())
     {
         if (line[0] != 'M' && line[0] != 'L')
         {
+			addPath();
             // new color
             char[] s = line.dup;
             auto clrval = parse!uint(s,16);
@@ -54,10 +95,8 @@ void parse_lion()
                     path.lineTo(x,y);
             }
         }
-        g_paths ~= path;
-        g_colors ~= clr;
-        path.clear();
     }
+	addPath();
 }
 
 ubyte[] draw()

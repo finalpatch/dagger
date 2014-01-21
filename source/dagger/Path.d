@@ -26,6 +26,8 @@ struct VertexT(T)
 ref P lineTo(P, T)(ref P path, T x, T y)
 {
     alias ForeachType!P VertexType;
+	if (path.length > 0 && path[$-1].x == x && path[$-1].y == y)
+		return path;
     path ~= VertexType(PathCmd.LineTo, x, y);
     return path;
 }
@@ -33,6 +35,8 @@ ref P lineTo(P, T)(ref P path, T x, T y)
 ref P moveTo(P, T)(ref P path, T x, T y)
 {
     alias ForeachType!P VertexType;
+	if (path.length > 0 && path[$-1].x == x && path[$-1].y == y)
+		return path;
     path ~= VertexType(PathCmd.MoveTo, x, y);
     return path;
 }
