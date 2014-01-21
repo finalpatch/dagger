@@ -58,19 +58,15 @@ public:
         m_right = int.min;
         m_bottom = int.min;
     }
-    void addPath(PathRange)(PathRange path)
+    void addPolygon(T)(T path)
     {
-        Vertex prev;
-        foreach(v; path)
+		if (path.length == 0)
+			return;
+
+        Vertex prev = path[0];
+        foreach(v; path[1..$])
         {
-            final switch (v.cmd)
-            {
-            case PathCmd.MoveTo:
-                break;
-            case PathCmd.LineTo:
-                line(prev.x, prev.y, v.x, v.y);
-                break;
-            }
+			line(prev.x, prev.y, v.x, v.y);
             prev = v;
         }
     }

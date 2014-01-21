@@ -17,58 +17,50 @@ alias PixfmtRGB8 pixfmt;
 immutable width     = 800;
 immutable height    = 800;
 
-Vertex[][] g_paths;
+alias Vertex[] Polygon;
+alias Polygon[] PolygonGroup;
+PolygonGroup[] g_polygons;
 RGBA8[] g_colors;
 
-double polygonArea(Vertex[] path)
+double polygonArea(Vertex[] polygon)
 {
 	double area = 0;
-	foreach(i; 0..path.length)
+	foreach(i; 0..polygon.length)
 	{
-		auto x1 = path[i].x;
-		auto y1 = path[i].y;
-		auto x2 = path[(i+1)%$].x;
-		auto y2 = path[(i+1)%$].y;
+		auto x1 = polygon[i].x;
+		auto y1 = polygon[i].y;
+		auto x2 = polygon[(i+1)%$].x;
+		auto y2 = polygon[(i+1)%$].y;
 		area += x1 * y2 - y1 * x2;
 	}
 	return area;
 }
 
-void fixPolygons(Vertex[] polygons)
+void fixPolygon(Vertex[] polygon)
 {
-	while(polygons.length > 0)
-	{
-		auto rest = find!(a=>a.cmd==PathCmd.MoveTo)(polygons[1..$]);
-		auto polygonPath = polygons[0..$-rest.length];
-		polygons = rest;
-		auto area = polygonArea(polygonPath);
-		if (area > 0)
-			reverse(polygonPath[1..$-1]);
-	}
+	auto area = polygonArea(polygon);
+	if (area > 0)
+		reverse(polygon);
 }
 
 void parse_lion()
 {
-    RGBA8 clr;
-    uint cmd; // 0 move, 1 line
-    Vertex[] path;
-
-	void addPath()
-	{
-		if (path.length > 0)
-		{
-			fixPolygons(path);
-			g_paths ~= path;
-			g_colors ~= clr;
-			path.clear();
-		}
-	}
+    RGBA8 clr;	
+	PolygonGroup group;
 
     foreach(line; lion.splitLines())
     {
+		Polygon polygon;
+
         if (line[0] != 'M' && line[0] != 'L')
         {
-			addPath();
+			if (group.length > 0)
+			{
+				g_colors ~= clr;
+				g_polygons ~= group;
+				group.clear();
+			}
+			
             // new color
             char[] s = line.dup;
             auto clrval = parse!uint(s,16);
@@ -76,27 +68,22 @@ void parse_lion()
                         (clrval >> 8) & 0xff,
                         (clrval) & 0xff);
             continue;
-        }
-        
+        }        
         foreach (word; line.split())
         {
-            if (word == "M")
-                cmd = 0;
-            else if (word == "L")
-                cmd = 1;
-            else
+            if (!(word == "M" || word == "L"))
             {
                 auto coords = word.split(",");
                 auto x = coords[0].to!double;
                 auto y = coords[1].to!double;
-                if (cmd == 0)
-                    path.moveTo(x,y);
-                else
-                    path.lineTo(x,y);
+				polygon.addVertex(x,y);
             }
         }
+		fixPolygon(polygon);
+		group ~= polygon;
     }
-	addPath();
+	g_colors ~= clr;
+	g_polygons ~= group;
 }
 
 ubyte[] draw()
@@ -110,10 +97,11 @@ ubyte[] draw()
                                0, 0, 1);
     auto ren = solidColorRenderer(surface);
 
-    foreach(i; 0..g_paths.length)
+    foreach(i; 0..g_polygons.length)
     {
         ras.reset();
-        ras.addPath(transform(g_paths[i], m));
+		foreach(polygon; g_polygons[i])
+			ras.addPolygon(transform(polygon, m));
         ren.setColor(g_colors[i]);
         render(ren, ras);
     }
