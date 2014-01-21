@@ -32,21 +32,21 @@ struct Vector(T, alias N)
         mixin(Unroll!("t.v[%]=v[%] * (-1);", N));
         return t;
     }
-    Vector opBinary(string op)(ref in T rhs) const
+    Vector opBinary(string op)(auto ref in T rhs) const
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
         Vector t;
         mixin(Unroll!("t.v[%]=v[%]"~op~"rhs;", N));
         return t;
     }
-    Vector opBinary(string op)(ref in Vector rhs) const
+    Vector opBinary(string op)(auto ref in Vector rhs) const
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
         Vector t;
         mixin(Unroll!("t.v[%]=v[%]"~op~"rhs.v[%];", N));
         return t;
     }
-    ref Vector opOpAssign(string op)(ref in Vector rhs)
+    ref Vector opOpAssign(string op)(auto ref in Vector rhs)
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
         mixin(Unroll!("v[%]"~op~"=rhs.v[%];", N));
@@ -71,16 +71,16 @@ struct Vector(T, alias N)
     T[N] v;
 }
 
-V.valtype dot(V, V2)(ref in V v1, ref in V2 v2)
+V.valtype dot(V, V2)(auto ref in V v1, auto ref in V2 v2)
     if( is(V.valtype == V2.valtype) )
 {
     return mixin(Unroll!("v1[%]*v2[%]", V.size, "+"));
 }
-V.valtype magnitude(V)(ref in V v)
+V.valtype magnitude(V)(auto ref in V v)
 {
     return sqrt(dot(v, v));
 }
-ref auto normalize(V)(ref in V v)
+ref auto normalize(V)(auto ref in V v)
 {
     v.v[] /= magnitude(v);
     return v;
@@ -121,14 +121,14 @@ struct Matrix(T, alias N)
     {
         return v[row * N + col];
     }
-    Matrix opBinary(string op)(ref in Matrix rhs) const
+    Matrix opBinary(string op)(auto ref in Matrix rhs) const
         if( op == "+" || op =="-")
     {
         Matrix t;
         mixin("t.v[]=v[]" ~ op ~"rhs.v[]");
         return t;
     }
-    Matrix opBinary(string op)(ref in Matrix rhs) const
+    Matrix opBinary(string op)(auto ref in Matrix rhs) const
         if( op == "*")
     {
         Matrix t;
@@ -143,13 +143,13 @@ struct Matrix(T, alias N)
         }
         return t;
     }
-    ref Matrix opOpAssign(string op)(ref in Matrix rhs)
+    ref Matrix opOpAssign(string op)(auto ref in Matrix rhs)
         if( op == "*")
     {
         this = this * rhs;
         return this;
     }
-    Vector!(T,N) opBinary(string op)(ref in Vector!(T,N) rhs) const
+    Vector!(T,N) opBinary(string op)(auto ref in Vector!(T,N) rhs) const
         if( op == "*")
     {
         Vector!(T,N) vec;
