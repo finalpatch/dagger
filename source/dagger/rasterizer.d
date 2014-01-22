@@ -19,19 +19,22 @@ public:
         m_right = int.min;
         m_bottom = int.min;
     }
-    void addPath(T)(T path, bool closePolygon = true)
+    void addPolygon(T)(T vertices)
     {
-		if (path.length == 0)
+		if (vertices.empty())
 			return;
-        Vertex prev = path[0];
-        foreach(v; path[1..$])
+		auto first = vertices.front();
+        auto last = first;
+		vertices.popFront();
+        foreach(v; vertices)
         {
-			addLine(prev.x, prev.y, v.x, v.y);
-            prev = v;
+			addLine(last.x, last.y, v.x, v.y);
+            last = v;
         }
-        if (closePolygon && (path[$-1].x != path[0].x || path[$-1].y != path[0].y))
+		// close path if necessary
+        if ((last.x != first.x || last.y != first.y))
         {
-            addLine(path[$-1].x, path[$-1].y, path[0].x, path[0].y);
+            addLine(last.x, last.y, first.x, first.y);
         }
     }
     void addLine(T)(T x1, T y1, T x2, T y2)

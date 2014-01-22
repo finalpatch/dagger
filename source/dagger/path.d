@@ -18,14 +18,28 @@ struct VertexT(T)
 
 alias VertexT!double Vertex;
 
-ref P addVertex(P, T)(ref P path, T x, T y)
-{
-    alias ForeachType!P VertexType;
-	if (path.length > 0 && path[$-1].x == x && path[$-1].y == y)
-		return path;
-    path ~= VertexType(x, y);
-    return path;
+// -----------------------------------------------------------------------------
+
+enum VertexFlag {
+	None,
+	Move,
+	CtrlPt,
+	Close,
 }
+
+struct PathVertexT(T)
+{
+    alias T ValueType;
+    T x, y;
+	VertexFlag flag;
+
+	this(T _x, T _y, VertexFlag _flag = VertexFlag.None)
+    {
+        x = _x; y = _y; flag = _flag;
+    }
+}
+
+alias PathVertexT!double PathVertex;
 
 // -----------------------------------------------------------------------------
 
@@ -55,4 +69,22 @@ void fixPolygonOrientation (PATH, PolygonOrientation orientation = PolygonOrient
 	{
 		if (area < 0) reverse(polygon);
 	}
+	static if (__traits(compiles, polygon[0].flag == VertexFlag.Close))
+	{
+		swap(polygon[0].flag, polygon[$-1].flag);
+	}
+}
+
+// -----------------------------------------------------------------------------
+
+unittest
+{
+	auto path = [PathVertex(0,0,VertexFlag.Move),
+				 PathVertex(1,0),
+				 PathVertex(1,1,VertexFlag.Close)];
+	fixPolygonOrientation(path);
+	auto path1 = [PathVertex(1,1,VertexFlag.Move),
+				  PathVertex(1,0),
+				  PathVertex(0,0,VertexFlag.Close)];
+	assert(path == path1);
 }
