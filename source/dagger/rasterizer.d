@@ -37,6 +37,33 @@ public:
             addLine(last.x, last.y, first.x, first.y);
         }
     }
+	void addPath(CONTAINER)(CONTAINER path)
+	{
+		if (path.empty())
+			return;
+		auto first = path.front();
+        auto last = first;
+		auto lastmove = last;
+		path.popFront();
+        foreach(v; path)
+        {
+			if (v.flag == VertexFlag.Move)
+			{
+				lastmove = last = v;
+			}
+			else if (v.flag == VertexFlag.Close)
+			{
+				addLine(last.x, last.y, v.x, v.y);
+				addLine(v.x, v.y, lastmove.x, lastmove.y);
+				last = v;
+			}
+			else
+			{
+				addLine(last.x, last.y, v.x, v.y);
+				last = v;
+			}
+        }
+	}
     void addLine(T)(T x1, T y1, T x2, T y2)
 	{
         static if (isFloatingPoint!T)

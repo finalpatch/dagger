@@ -7,7 +7,6 @@ import std.range;
 struct VertexT(T)
 {
     alias T ValueType;
-
     T x, y;
 
     this(T _x, T _y)
@@ -69,7 +68,7 @@ void fixPolygonOrientation (PATH, PolygonOrientation orientation = PolygonOrient
 	{
 		if (area < 0) reverse(polygon);
 	}
-	static if (__traits(compiles, polygon[0].flag == VertexFlag.Close))
+	static if (__traits(compiles, polygon[0].flag == VertexFlag.None))
 	{
 		swap(polygon[0].flag, polygon[$-1].flag);
 	}
