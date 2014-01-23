@@ -35,7 +35,7 @@ T lerp(T)(T p, T q, T a)
     }
     else if (isIntegral!T)
     {
-        CalcType!T cp = p, cq = q, ca = a;
+        CalcType!T cp = p, cq = q;
         return cast(T)((cq * a + cp * (T.max - a) + (T.max >> 1)) >> (T.sizeof * 8));
     }
 }

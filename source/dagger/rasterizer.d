@@ -91,10 +91,8 @@ package:
     {
         addCurrentCell();
         auto cells = new Cell[][bottom()-top()+1];
-        foreach(row; 0..(bottom()-top()+1))
-        {
-            cells[row] = m_cells.getline(row+top());
-        }
+        foreach(row; top()..bottom()+1)
+            cells[row-top()] = m_cells.getline(row);
         return cells;
     }
     
