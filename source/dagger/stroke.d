@@ -21,7 +21,7 @@ public:
 	{
 		m_source = path;
 		m_rest = m_source;
-		m_width = width;
+		m_halfWidth = width / 2;
 	}	
 	bool empty() const
 	{
@@ -40,7 +40,7 @@ public:
 		m_output.popFront();
 	}
 
-	double m_width;
+	double m_halfWidth;
 	CONTAINER m_source;
 	CONTAINER m_rest;
 	PathVertex[] m_output;
@@ -82,8 +82,8 @@ public:
 		double dy = v2.y - v1.y;
 		auto l = sqrt(dx * dx + dy * dy);
 		dx /= l; dy /= l;
-		auto p1 = PathVertex(-dy * m_width + v2.x, dx * m_width + v2.y);
-		auto p2 = PathVertex(dy * m_width + v2.x, -dx * m_width + v2.y);
+		auto p1 = PathVertex(-dy * m_halfWidth + v2.x, dx * m_halfWidth + v2.y);
+		auto p2 = PathVertex(dy * m_halfWidth + v2.x, -dx * m_halfWidth + v2.y);
 		m_output  ~= [p1, p2];
 	}
 	void calcJoint(in PathVertex v1, in PathVertex v2, in PathVertex v3)
@@ -108,8 +108,8 @@ public:
 		auto area = v1.x * v2.y - v1.y * v2.x + v2.x * v3.y - v2.y * v3.x + v3.x * v1.y - v3.y * v1.x;
 		auto dir = area < 0 ? -1 : 1;
 
-		auto p1 = PathVertex(dir * dx * m_width / sin_a + v2.x,
-							 dir * dy * m_width / sin_a + v2.y);
+		auto p1 = PathVertex(dir * dx * m_halfWidth / sin_a + v2.x,
+							 dir * dy * m_halfWidth / sin_a + v2.y);
 		m_output  ~= [p1];
 	}
 }
