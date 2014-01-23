@@ -11,7 +11,7 @@ enum RowOrder {
 class Surface(T, RowOrder rowOrder = RowOrder.TopDown)
 {
 public:
-	alias T valueType;
+    alias T valueType;
 
     this()(uint width, uint height)
     {
@@ -28,9 +28,9 @@ public:
     {
         T[] tbuf = cast(T[])buf;
         assert(tbuf.length >= (width * height));
-		m_buf = tbuf;
-		m_width = width;
-		m_height = height;
+        m_buf = tbuf;
+        m_width = width;
+        m_height = height;
         auto absStride = m_buf.length / m_height;
         static if (rowOrder == RowOrder.TopDown)
             auto rows = chunks(m_buf, absStride);
@@ -58,8 +58,12 @@ public:
     uint height() const { return m_height; }
 
 private:
-	T[]   m_buf;
+    T[]   m_buf;
     T[][] m_rowCache;
-	uint  m_width;
-	uint  m_height;
+    uint  m_width;
+    uint  m_height;
 }
+
+// Local Variables:
+// indent-tabs-mode: nil
+// End:

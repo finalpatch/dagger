@@ -29,20 +29,20 @@ private template CalcType(T)
 
 T lerp(T)(T p, T q, T a)
 {
-	static if (isFloatingPoint!T)
+    static if (isFloatingPoint!T)
     {
         return (1 - a) * p + a * q;
     }
     else if (isIntegral!T)
     {
-		CalcType!T cp = p, cq = q, ca = a;
-		return cast(T)((cq * a + cp * (T.max - a) + (T.max >> 1)) >> (T.sizeof * 8));
+        CalcType!T cp = p, cq = q, ca = a;
+        return cast(T)((cq * a + cp * (T.max - a) + (T.max >> 1)) >> (T.sizeof * 8));
     }
 }
 
 T multiply(T)(T a, T b)
 {
-	static if (isFloatingPoint!T)
+    static if (isFloatingPoint!T)
     {
         return a * b;
     }
@@ -52,3 +52,7 @@ T multiply(T)(T a, T b)
         return cast(T)((t * b + (T.max >> 1)) >> (T.sizeof * 8));
     }
 }
+
+// Local Variables:
+// indent-tabs-mode: nil
+// End:

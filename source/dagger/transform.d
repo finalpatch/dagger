@@ -33,3 +33,7 @@ auto clip(CONTAINER, T1,T2)(CONTAINER vertices, T1 x1, T1 y1, T2 x2, T2 y2)
     }
     return map!tr(vertices);
 }
+
+// Local Variables:
+// indent-tabs-mode: nil
+// End:

@@ -187,6 +187,10 @@ struct Matrix(T, alias N)
 
 protected template Unroll(alias CODE, alias N, alias SEP="")
 {
-	enum t = replace(CODE, "%", "%1$d");
-	enum Unroll = iota(N).map!(i => format(t, i)).join(SEP);
+    enum t = replace(CODE, "%", "%1$d");
+    enum Unroll = iota(N).map!(i => format(t, i)).join(SEP);
 }
+
+// Local Variables:
+// indent-tabs-mode: nil
+// End:

@@ -12,9 +12,9 @@ struct Gray(T)
     this(T _l)
     {
         l = _l;
-		static if (isFloatingPoint!T)
+        static if (isFloatingPoint!T)
             a = 1.0;
-		else if (isIntegral!T)
+        else if (isIntegral!T)
             a = T.max;
     }
 }
@@ -106,3 +106,7 @@ alias Gray!float  Gray32;
 alias RGBA!ubyte  RGBA8;
 alias RGBA!ushort RGBA16;
 alias RGBA!float  RGBA32;
+
+// Local Variables:
+// indent-tabs-mode: nil
+// End:

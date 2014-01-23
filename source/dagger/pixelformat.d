@@ -5,8 +5,8 @@ import dagger.basics;
 
 struct PixfmtGray(T)
 {
-	alias PixfmtGray!T selfType;
-	alias T ComponentType;
+    alias PixfmtGray!T selfType;
+    alias T ComponentType;
     alias Gray!T ColorType;
     
     T v;
@@ -28,10 +28,10 @@ struct PixfmtGray(T)
         set(c);
     }
 
-	void blend(selfType pixel, ComponentType alpha)
-	{
-		v = lerp(v, pixel.v, alpha);
-	}
+    void blend(selfType pixel, ComponentType alpha)
+    {
+        v = lerp(v, pixel.v, alpha);
+    }
 }
 
 enum ComponentOrderRGB {
@@ -46,8 +46,8 @@ enum ComponentOrderBGRA {
 
 struct PixfmtRGB(T, ORD)
 {
-	alias PixfmtRGB!(T, ORD) selfType;
-	alias T ComponentType;
+    alias PixfmtRGB!(T, ORD) selfType;
+    alias T ComponentType;
     alias RGBA!T ColorType;
 
     T[ORD.NumOfComponents] components;
@@ -76,17 +76,17 @@ struct PixfmtRGB(T, ORD)
     T b() const { return components[ORD.B]; }
 
     void blend(selfType pixel, ComponentType alpha)
-	{
-		components[ORD.R] = lerp(r, pixel.r, alpha);
-		components[ORD.G] = lerp(g, pixel.g, alpha);
-		components[ORD.B] = lerp(b, pixel.b, alpha);
-	}
+    {
+        components[ORD.R] = lerp(r, pixel.r, alpha);
+        components[ORD.G] = lerp(g, pixel.g, alpha);
+        components[ORD.B] = lerp(b, pixel.b, alpha);
+    }
 }
 
 struct PixfmtRGBA(T, ORD)
 {
-	alias PixfmtRGBA!(T, ORD) selfType;
-	alias T ComponentType;
+    alias PixfmtRGBA!(T, ORD) selfType;
+    alias T ComponentType;
     alias RGBA!T ColorType;
 
     T[ORD.NumOfComponents] components;
@@ -116,13 +116,13 @@ struct PixfmtRGBA(T, ORD)
     T b() const { return components[ORD.B]; }
     T a() const { return components[ORD.A]; } 
    
-	void blend(selfType pixel, ComponentType alpha)
-	{
+    void blend(selfType pixel, ComponentType alpha)
+    {
         components[ORD.A] = multiply(a, alpha);
-		components[ORD.R] = lerp(r, pixel.r, a);
-		components[ORD.G] = lerp(g, pixel.g, a);
-		components[ORD.B] = lerp(b, pixel.b, a);
-	}
+        components[ORD.R] = lerp(r, pixel.r, a);
+        components[ORD.G] = lerp(g, pixel.g, a);
+        components[ORD.B] = lerp(b, pixel.b, a);
+    }
 }
 
 alias PixfmtGray!(ubyte)                      PixfmtGray8;
@@ -138,3 +138,7 @@ alias PixfmtRGBA!(ushort, ComponentOrderRGBA) PixfmtRGBA16;
 alias PixfmtRGBA!(float,  ComponentOrderRGBA) PixfmtRGBA32;
 
 alias PixfmtRGBA!(ubyte,  ComponentOrderBGRA) PixfmtBGRA8;
+
+// Local Variables:
+// indent-tabs-mode: nil
+// End:
