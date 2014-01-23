@@ -6,7 +6,7 @@ import std.array;
 import dagger.basics;
 import dagger.path;
 
-class RasterizerT(uint SubPixelAccuracy, uint CellStoreChunkSize = 16)
+class RasterizerT(int SubPixelAccuracy, int CellStoreChunkSize = 16)
 {
 public:
 	enum cellWidth = 1 << subPixelAccuracy;
@@ -122,8 +122,8 @@ private:
 		x2 >>= SubPixelAccuracy;
 		y2 >>= SubPixelAccuracy;
 		m_left   = min(x1, x2, m_left);
-		m_top    = min(y1, y2, m_top);		
 		m_right  = max(x1, x2, m_right);
+		m_top    = min(y1, y2, m_top);
 		m_bottom = max(y1, y2, m_bottom);
     }
 	
@@ -188,8 +188,10 @@ package
 				m_chunks[chunkId] = new Appender!(Cell[])[ChunkSize];
 			m_chunks[chunkId][idxInChunk].put(c);
 		}
-		Cell[] getline(size_t y)
+		Cell[] getline(int y)
 		{
+            if (y < 0)
+                return [];
 			auto chunkId = y / ChunkSize;
 			auto idxInChunk = y - chunkId * ChunkSize;
 			if (chunkId >= m_chunks.length || m_chunks[chunkId].empty)

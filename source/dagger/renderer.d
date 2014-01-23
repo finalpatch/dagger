@@ -53,11 +53,11 @@ auto solidColorRenderer(SURFACE)(SURFACE surface)
 
 void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
 {
-	auto ymax = ren.surface.height();
+	auto h = ren.surface.height();
 	foreach(line; parallel(ras.finish()))
     {
 		// clip y here
-		if (line.length > 0 && line[0].y >= 0 && line[0].y < ymax)
+		if (line.length > 0 && line[0].y >= 0 && line[0].y < h)
 		{
 			sort!("a.x < b.x")(line);
 			renderScanline(line, ren, ras);
@@ -87,7 +87,7 @@ private
 					break;
 				area += line[0].area;
 				cover += line[0].cover;
-			} while (line.length > 0);
+			} while (true);
 
 			alias RENDERER.CoverType CoverType;
 			enum shift = RASTERIZER.subPixelAccuracy;
@@ -96,7 +96,7 @@ private
 			if (area)
 			{
 				auto a = scaleAlpha!(CoverType, shift)(abs((cover << shift2) - area ) >> shift2);
-				if (a && x >= 0 && x < (xmax-1)) // clip x
+				if (a && x >= 0 && x < xmax) // clip x
 					ren.renderSpan(x,x+1,y, a);
 				x++;
 			}
