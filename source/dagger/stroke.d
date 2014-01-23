@@ -60,14 +60,14 @@ public:
 
 		for(auto i = 0; i < (segment.length-2); ++i)
 		{
-			calcJoint(segment[i], segment[i+1], segment[i+2], -1);
+			calcJoint(segment[i], segment[i+1], segment[i+2]);
 		}
 		
 		calcCap(segment[$-2], segment[$-1]);
 
 		for(auto i = segment.length-1; i >= 2; --i)
 		{
-			calcJoint(segment[i], segment[i-1], segment[i-2], 1);
+			calcJoint(segment[i], segment[i-1], segment[i-2]);
 		}
 
 		calcCap(segment[1], segment[0]);
@@ -86,7 +86,7 @@ public:
 		auto p2 = PathVertex(dy * m_width + v2.x, -dx * m_width + v2.y);
 		m_output  ~= [p1, p2];
 	}
-	void calcJoint(in PathVertex v1, in PathVertex v2, in PathVertex v3, int dir)
+	void calcJoint(in PathVertex v1, in PathVertex v2, in PathVertex v3)
 	{
 		double dx1 = v2.x - v1.x;
 		double dy1 = v2.y - v1.y;
@@ -104,8 +104,12 @@ public:
 		dx /= l; dy /= l;
 		double cos_a = (dx * dx1 + dy * dy1);
 		double sin_a = sqrt(1 - cos_a * cos_a);
-		
-		auto p1 = PathVertex(dx * dir * m_width / sin_a  + v2.x, dy * dir * m_width / sin_a + v2.y);
+
+		auto area = v1.x * v2.y - v1.y * v2.x + v2.x * v3.y - v2.y * v3.x + v3.x * v1.y - v3.y * v1.x;
+		auto dir = area < 0 ? -1 : 1;
+
+		auto p1 = PathVertex(dir * dx * m_width / sin_a + v2.x,
+							 dir * dy * m_width / sin_a + v2.y);
 		m_output  ~= [p1];
 	}
 }
