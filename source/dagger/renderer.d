@@ -19,15 +19,15 @@ public:
 	{
 		m_surface = surface;
 	}
-	final void renderSpan(int x, int y, CoverType cover, uint length)
+	final void renderSpan(int x1, int x2, int y, CoverType cover)
 	{
         if(cover.isOpaque())
         {
-            m_surface[y][x .. x + length] = m_pixel;
+            m_surface[y][x1..x2] = m_pixel;
         }
         else
         {
-            foreach(ref p; m_surface[y][x .. x + length])
+            foreach(ref p; m_surface[y][x1..x2])
                 p.blend(m_pixel, cover);
         }
 	}
@@ -91,7 +91,7 @@ private
 			{
 				auto a = scaleAlpha!(CoverType, shift)(abs((cover << shift2) - area ) >> shift2);
 				if (a)
-					ren.renderSpan(x,y, a, 1);
+					ren.renderSpan(x,x+1,y, a);
 				x++;
 			}
 
@@ -99,7 +99,7 @@ private
 			{
 				auto a = scaleAlpha!(CoverType, shift)(abs(cover));
 				if (a)
-					ren.renderSpan(x,y, a, line[0].x-x);
+					ren.renderSpan(x,line[0].x,y, a);
 			}
 		}
 	}
