@@ -178,6 +178,8 @@ package
 		}
 		void put(ref in Cell c)
 		{
+			if(c.y < 0)
+				return;
 			auto chunkId = c.y / ChunkSize;
 			auto idxInChunk = c.y - chunkId * ChunkSize;
 			if (chunkId >= m_chunks.length)

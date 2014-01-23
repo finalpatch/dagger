@@ -53,10 +53,15 @@ auto solidColorRenderer(SURFACE)(SURFACE surface)
 
 void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
 {
+	auto ymax = ren.surface.height();
 	foreach(line; parallel(ras.finish()))
     {
-        sort!("a.x < b.x")(line);
-		renderScanline(line, ren, ras);
+		// clip y here
+		if (line.length > 0 && line[0].y >= 0 && line[0].y < ymax)
+		{
+			sort!("a.x < b.x")(line);
+			renderScanline(line, ren, ras);
+		}
     }
 }
 
@@ -66,6 +71,7 @@ private
 {
 	void renderScanline(CELLS, RENDERER, RASTERIZER)(CELLS line, RENDERER ren, RASTERIZER ras)
 	{
+		auto xmax = ren.m_surface.width()-1;
 		int cover = 0;
 		while(line.length > 0)
 		{
@@ -90,7 +96,7 @@ private
 			if (area)
 			{
 				auto a = scaleAlpha!(CoverType, shift)(abs((cover << shift2) - area ) >> shift2);
-				if (a)
+				if (a && x >= 0 && x < (xmax-1)) // clip x
 					ren.renderSpan(x,x+1,y, a);
 				x++;
 			}
@@ -99,7 +105,17 @@ private
 			{
 				auto a = scaleAlpha!(CoverType, shift)(abs(cover));
 				if (a)
-					ren.renderSpan(x,line[0].x,y, a);
+				{
+					// clip x
+					auto x1 = x;
+					auto x2 = line[0].x;
+					if (x2 > 0 && x1 < xmax)
+					{
+						if (x1 < 0) x1 = 0;
+						if (x2 > xmax) x2 = xmax;
+						ren.renderSpan(x1,x2,y,a);
+					}
+				}
 			}
 		}
 	}
