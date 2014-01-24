@@ -6,7 +6,7 @@ import std.array;
 import dagger.basics;
 import dagger.path;
 
-class RasterizerT(int SubPixelAccuracy, int CellStoreChunkSize = 16)
+class RasterizerT(int SubPixelAccuracy)
 {
 public:
     enum cellWidth = 1 << subPixelAccuracy;
@@ -101,7 +101,7 @@ package:
     final int right()  { return m_right; }
     final int bottom() { return m_bottom;}
 private:
-    CellStore!CellStoreChunkSize m_cells;
+    CellStore m_cells;
     Cell m_currentCell;
     int m_left, m_top, m_right, m_bottom;
 
@@ -163,38 +163,28 @@ package
         int area;
     }
 
-    struct CellStore(size_t ChunkSize)
+    struct CellStore
     {
-        Appender!(Cell[])[][] m_chunks;
+        enum ChunkSize = 64;
+        Appender!(Cell[])[] m_lines;
         void clear()
         {
-            foreach(chunk; m_chunks)
-            {
-                foreach(l; chunk)
-                    l.clear();
-            }
+            foreach(l; m_lines)
+                l.clear();
         }
         void put(ref in Cell c)
         {
             if(c.y < 0)
                 return;
-            auto chunkId = c.y / ChunkSize;
-            auto idxInChunk = c.y - chunkId * ChunkSize;
-            if (chunkId >= m_chunks.length)
-                m_chunks.length = chunkId * 2 + 1;
-            if (m_chunks[chunkId].empty)
-                m_chunks[chunkId] = new Appender!(Cell[])[ChunkSize];
-            m_chunks[chunkId][idxInChunk].put(c);
+            if (c.y >= m_lines.length)
+                m_lines.length = c.y + ChunkSize;
+            m_lines[c.y].put(c);
         }
         Cell[] getline(int y)
         {
-            if (y < 0)
+            if (y < 0 || y >= m_lines.length)
                 return [];
-            auto chunkId = y / ChunkSize;
-            auto idxInChunk = y - chunkId * ChunkSize;
-            if (chunkId >= m_chunks.length || m_chunks[chunkId].empty)
-                return [];
-            return m_chunks[chunkId][idxInChunk].data();
+            return m_lines[y].data();
         }
     }
 }
