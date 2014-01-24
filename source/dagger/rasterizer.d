@@ -114,11 +114,11 @@ private:
         {
             this.updateCell(x, y, fx1, fy1, fx2, fy2);
         }
-        map_grid_spans!(cellWidth, callUpdateCell)(x1, y1, x2, y2);
-        x1 >>= SubPixelAccuracy;
-        y1 >>= SubPixelAccuracy;
-        x2 >>= SubPixelAccuracy;
-        y2 >>= SubPixelAccuracy;
+        map_grid_spans!(subPixelAccuracy, callUpdateCell)(x1, y1, x2, y2);
+        x1 >>= subPixelAccuracy;
+        y1 >>= subPixelAccuracy;
+        x2 >>= subPixelAccuracy;
+        y2 >>= subPixelAccuracy;
         m_left   = min(x1, x2, m_left);
         m_right  = max(x1, x2, m_right);
         m_top    = min(y1, y2, m_top);
@@ -191,12 +191,13 @@ package
 
 private
 {
-    void map_line_spans(int cellWidth, alias F)(int a1, int b1, int a2, int b2)
+    void map_line_spans(int Accuracy, alias F)(int a1, int b1, int a2, int b2)
     {
-        auto b1_m = b1 / cellWidth;
-        auto b1_f = b1 % cellWidth;
-        auto b2_m = b2 / cellWidth;
-        auto b2_f = b2 % cellWidth;
+        enum cellWidth = 1 << Accuracy;
+        auto b1_m = b1 >> Accuracy;
+        auto b1_f = b1 - (b1_m << Accuracy);
+        auto b2_m = b2 >> Accuracy;
+        auto b2_f = b2 - (b2_m << Accuracy);
         if (b1_m == b2_m)
         {
             F(b1_m, a1, b1_f, a2, b2_f);
@@ -206,17 +207,18 @@ private
             auto b_m = b1_m;
             auto delta_a = a2 - a1;
             auto delta_b = b2 - b1;
-            auto b_incr = b2 > b1 ? 1 : (b2 < b1 ? -1 : 0);
-            auto a_incr = a2 > a1 ? 1 : (a2 < a1 ? -1 : 0);
-            int from_boundary, to_boundary, first;
-            if (b2 > b1)
+            auto a_incr = delta_a ? (delta_a > 0 ? 1 : -1) : 0;
+            int b_incr, from_boundary, to_boundary, first;
+            if (delta_b > 0)
             {
+                b_incr = 1;
                 from_boundary = 0;
                 to_boundary = cellWidth;
                 first = cellWidth - b1_f;
             }
             else
             {
+                b_incr = -1;
                 delta_b = -delta_b;
                 from_boundary = cellWidth;
                 to_boundary = 0;
@@ -246,7 +248,7 @@ private
         }
     }
 
-    void map_grid_spans(int cellWidth, alias F)(int x1, int y1, int x2, int y2)
+    void map_grid_spans(int Accuracy, alias F)(int x1, int y1, int x2, int y2)
     {
         void hline(int y_m, int x1, int y1_f, int x2, int y2_f)
         {
@@ -254,9 +256,9 @@ private
             {
                 F(x_m, y_m, x1_f, y1_f, x2_f, y2_f);
             }
-            map_line_spans!(cellWidth, pixel)(y1_f, x1, y2_f, x2);
+            map_line_spans!(Accuracy, pixel)(y1_f, x1, y2_f, x2);
         }
-        map_line_spans!(cellWidth, hline)(x1, y1, x2, y2);
+        map_line_spans!(Accuracy, hline)(x1, y1, x2, y2);
     }
 
 }
