@@ -140,6 +140,10 @@ struct Matrix(T, alias N)
     {
         return v[row * N + col];
     }
+    ref T opIndex(int row, int col)
+    {
+        return v[row * N + col];
+    }
     Matrix opBinary(string op)(auto ref in Matrix rhs) const
         if( op == "+" || op =="-")
     {
