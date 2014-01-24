@@ -39,23 +39,23 @@ public:
         m_rowCache = array(rows[0..height]);
     }
     
-    T[] opIndex(uint i)
+    final T[] opIndex(uint i)
     {
         return m_rowCache[i];
     }
     
-    const(T)[] opIndex(uint i) const
+    final const(T)[] opIndex(uint i) const
     {
         return m_rowCache[i];
     }
 
-    ubyte[] bytes()
+    final ubyte[] bytes()
     {
         return cast(ubyte[])m_buf;
     }
 
-    uint width()  const { return m_width;  }
-    uint height() const { return m_height; }
+    final uint width()  const { return m_width;  }
+    final uint height() const { return m_height; }
 
 private:
     T[]   m_buf;

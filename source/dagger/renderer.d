@@ -19,26 +19,25 @@ public:
     {
         m_surface = surface;
     }
-    final void renderSpan(int x1, int x2, int y, CoverType cover)
+    final void fillSpan(int x1, int x2, int y)
     {
-        if(cover.isOpaque())
-        {
-            m_surface[y][x1..x2] = m_pixel;
-        }
-        else
-        {
-            foreach(ref p; m_surface[y][x1..x2])
-                p.blend(m_pixel, cover);
-        }
+        m_surface[y][x1..x2] = m_pixel;
+    }
+    final void blendSpan(int x1, int x2, int y, CoverType cover)
+    {
+        foreach(ref p; m_surface[y][x1..x2])
+            p.blend(m_pixel, cover);
+    }
+    final void blendPixel(int x, int y, CoverType cover)
+    {
+        m_surface[y][x].blend(m_pixel, cover);
     }
     final void color(T)(T clr)
     {
         m_pixel = clr;
     }
-    final SURFACE surface()
-    {
-        return m_surface;
-    }
+    final uint width()  const { return m_surface.width();  }
+    final uint height() const { return m_surface.height(); }
 private:
     SURFACE m_surface;
     SURFACE.valueType m_pixel;
@@ -53,7 +52,7 @@ auto solidColorRenderer(SURFACE)(SURFACE surface)
 
 void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
 {
-    auto h = ren.surface.height();
+    auto h = ren.height();
     foreach(line; parallel(ras.finish()))
     {
         // clip y here
@@ -71,7 +70,7 @@ private
 {
     void renderScanline(CELLS, RENDERER, RASTERIZER)(CELLS line, RENDERER ren, RASTERIZER ras)
     {
-        int w = ren.m_surface.width();
+        int w = ren.width();
         int cover = 0;
         while(line.length > 0)
         {
@@ -97,7 +96,7 @@ private
             {
                 auto a = scaleAlpha!(CoverType, shift)(abs((cover << shift2) - area ) >> shift2);
                 if (a && x >= 0 && x < w) // clip x
-                    ren.renderSpan(x,x+1,y, a);
+                    ren.blendPixel(x,y,a);
                 x++;
             }
 
@@ -113,7 +112,10 @@ private
                     {
                         if (x1 < 0) x1 = 0;
                         if (x2 > w) x2 = w;
-                        ren.renderSpan(x1,x2,y,a);
+                        if (a == CoverType.max)
+                            ren.fillSpan(x1,x2,y);
+                        else
+                            ren.blendSpan(x1,x2,y,a);
                     }
                 }
             }
