@@ -62,9 +62,9 @@ struct PixfmtRGB(T, ORD)
     }
     void set(ColorType c)
     {
-        components[ORD.R] = c.r;
-        components[ORD.G] = c.g;
-        components[ORD.B] = c.b;
+        r = c.r;
+        g = c.g;
+        b = c.b;
     }
     void opAssign(ColorType c)
     {
@@ -74,12 +74,15 @@ struct PixfmtRGB(T, ORD)
     T r() const { return components[ORD.R]; }
     T g() const { return components[ORD.G]; }
     T b() const { return components[ORD.B]; }
+    ref T r() { return components[ORD.R]; }
+    ref T g() { return components[ORD.G]; }
+    ref T b() { return components[ORD.B]; }
 
     void blend(selfType pixel, ComponentType alpha)
     {
-        components[ORD.R] = lerp(r, pixel.r, alpha);
-        components[ORD.G] = lerp(g, pixel.g, alpha);
-        components[ORD.B] = lerp(b, pixel.b, alpha);
+        r = lerp(r, pixel.r, alpha);
+        g = lerp(g, pixel.g, alpha);
+        b = lerp(b, pixel.b, alpha);
     }
 }
 
@@ -101,10 +104,10 @@ struct PixfmtRGBA(T, ORD)
     }
     void set(ColorType c)
     {
-        components[ORD.R] = c.r;
-        components[ORD.G] = c.g;
-        components[ORD.B] = c.b;
-        components[ORD.A] = c.a;
+        r = c.r;
+        g = c.g;
+        b = c.b;
+        a = c.a;
     }
     void opAssign(ColorType c)
     {
@@ -115,13 +118,31 @@ struct PixfmtRGBA(T, ORD)
     T g() const { return components[ORD.G]; }
     T b() const { return components[ORD.B]; }
     T a() const { return components[ORD.A]; } 
-   
+    ref T r() { return components[ORD.R]; }
+    ref T g() { return components[ORD.G]; }
+    ref T b() { return components[ORD.B]; }
+    ref T a() { return components[ORD.A]; }
+
     void blend(selfType pixel, ComponentType alpha)
     {
-        components[ORD.A] = multiply(a, alpha);
-        components[ORD.R] = lerp(r, pixel.r, a);
-        components[ORD.G] = lerp(g, pixel.g, a);
-        components[ORD.B] = lerp(b, pixel.b, a);
+        // premultiply fg pixel
+        if (pixel.a != ComponentType.max)
+        {
+            pixel.r = multiply(pixel.r, pixel.a);
+            pixel.g = multiply(pixel.g, pixel.a);
+            pixel.b = multiply(pixel.b, pixel.a);
+        }
+        // premultiply bg pixel
+        if (a != ComponentType.max)
+        {
+            r = multiply(r, a);
+            g = multiply(g, a);
+            b = multiply(b, a);
+        }
+        r = lerp(r, pixel.r, alpha);
+        g = lerp(g, pixel.g, alpha);
+        b = lerp(b, pixel.b, alpha);
+        a = lerp(a, pixel.a, alpha);
     }
 }
 
