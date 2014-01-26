@@ -1,0 +1,10 @@
+{
+	"name": "lion",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2014, fengli",
+	"authors": ["finalpatch"],
+	"dependencies": {
+        "derelict-sdl2" : "~master",
+        "dagger": { "version":"~master", "path":"../.."}
+	}
+}
