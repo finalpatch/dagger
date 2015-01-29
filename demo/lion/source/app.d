@@ -6,7 +6,7 @@ import std.algorithm;
 import std.datetime;
 import derelict.sdl2.sdl;
 import dagger.surface;
-import dagger.pixelformat;
+import dagger.pixfmt;
 import dagger.rasterizer;
 import dagger.renderer;
 import dagger.path;
@@ -37,7 +37,7 @@ void parse_lion()
 			{
 				g_colors ~= clr;
 				g_polygons ~= group;
-				group.clear();
+				group.destroy();
 			}
 			
             // new color
@@ -84,7 +84,7 @@ ubyte[] draw()
                                 0, 1, 0,
                                 0, 0, 1);
     foreach(a; 0..180)
-    //auto a = 0;
+    // auto a = 0;
     {
         auto r = PI/90*a;
         auto sin_r = sin(r);

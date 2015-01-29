@@ -86,16 +86,23 @@ public:
         m_right = int.min;
         m_bottom = int.min;
     }
-package:
-    Cell[][] finish()
+
+    Cell[][] getScanlines()
     {
-        addCurrentCell();
-        auto cells = new Cell[][bottom()-top()+1];
-        foreach(row; top()..bottom()+1)
-            cells[row-top()] = m_cells.getline(row);
-        return cells;
+        Cell[] l = m_cells.getline(m_currentCell.y);
+        if (l.length > 0 && l[$-1] != m_currentCell)
+            addCurrentCell();
+        immutable firstLine = max(top(), 0);
+        immutable lastLine  = bottom() + 1;
+        auto scanlines = new Cell[][lastLine - firstLine];
+        foreach(row; firstLine..lastLine)
+        {
+            auto scanline = m_cells.getline(row);
+            scanlines[row-firstLine] = scanline;
+        }
+        return scanlines;
     }
-    
+
     final int left()   { return m_left;  }
     final int top()    { return m_top;   }
     final int right()  { return m_right; }
@@ -124,7 +131,7 @@ private:
         m_top    = min(y1, y2, m_top);
         m_bottom = max(y1, y2, m_bottom);
     }
-    
+
     void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
     {
         if (x != m_currentCell.x || y != m_currentCell.y)
@@ -224,13 +231,15 @@ private
                 to_boundary = 0;
                 first = b1_f;
             }
-            auto a  = (first * delta_a) / delta_b;
-            auto ma = (first * delta_a) % delta_b;
+            auto t = first * delta_a;
+            auto a  = t / delta_b;
+            auto ma = t - a * delta_b;
             a += a1;
             F(b1_m, a1, b1_f, a, to_boundary);
             b_m += b_incr;
-            auto step = (cellWidth * delta_a) / delta_b;
-            auto mod  = (cellWidth * delta_a) % delta_b;
+            t = cellWidth * delta_a;
+            auto step = t / delta_b;
+            auto mod  = t - step * delta_b;
             while (b_m != b2_m)
             {
                 auto prev_a = a;

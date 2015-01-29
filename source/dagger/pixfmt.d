@@ -1,36 +1,35 @@
-module dagger.pixelformat;
+module dagger.pixfmt;
 
 public import dagger.color;
 import dagger.basics;
 
 struct PixfmtGray(T)
 {
-    alias PixfmtGray!T selfType;
+    alias PixfmtGray!T SelfType;
     alias T ComponentType;
-    alias Gray!T ColorType;
-    
-    T v;
-    
-    this(ColorType c)
-    {
-        set(c);
-    }
-    ColorType get() const
-    {
-        return ColorType(v);
-    }
-    void set(ColorType c)
-    {
-        v = c.l;
-    }
-    void opAssign(ColorType c)
-    {
-        set(c);
-    }
 
-    void blend(selfType pixel, ComponentType alpha)
+    T l;
+
+    this(U)(Gray!U c)
     {
-        v = lerp(v, pixel.v, alpha);
+        set(c);
+    }
+    Gray!U get(U=T)() const
+    {
+        return Gray!U(l);
+    }
+    void set(U)(Gray!U c)
+    {
+        auto t = Gray!T(c);
+        l = t.l;
+    }
+    void opAssign(U)(Gray!U c)
+    {
+        set(c);
+    }
+    void blend(SelfType pixel, ComponentType alpha)
+    {
+        l = lerp(l, pixel.l, alpha);
     }
 }
 
@@ -46,27 +45,25 @@ enum ComponentOrderBGRA {
 
 struct PixfmtRGB(T, ORD)
 {
-    alias PixfmtRGB!(T, ORD) selfType;
+    alias PixfmtRGB!(T, ORD) SelfType;
     alias T ComponentType;
-    alias RGBA!T ColorType;
 
     T[ORD.NumOfComponents] components;
 
-    this(ColorType c)
+    this(U)(RGBA!U c)
     {
         set(c);
     }
-    ColorType get() const
+    RGBA!U get(U=T)() const
     {
-        return ColorType(r,g,b);
+        return RGBA!U(r,g,b);
     }
-    void set(ColorType c)
+    void set(U)(RGBA!U c)
     {
-        r = c.r;
-        g = c.g;
-        b = c.b;
+        auto t = RGBA!T(c);
+        r = t.r; g = t.g; b = t.b;
     }
-    void opAssign(ColorType c)
+    void opAssign(U)(RGBA!U c)
     {
         set(c);
     }
@@ -74,11 +71,11 @@ struct PixfmtRGB(T, ORD)
     T r() const { return components[ORD.R]; }
     T g() const { return components[ORD.G]; }
     T b() const { return components[ORD.B]; }
-    ref T r() { return components[ORD.R]; }
-    ref T g() { return components[ORD.G]; }
-    ref T b() { return components[ORD.B]; }
+    ref T r()   { return components[ORD.R]; }
+    ref T g()   { return components[ORD.G]; }
+    ref T b()   { return components[ORD.B]; }
 
-    void blend(selfType pixel, ComponentType alpha)
+    void blend(SelfType pixel, ComponentType alpha)
     {
         r = lerp(r, pixel.r, alpha);
         g = lerp(g, pixel.g, alpha);
@@ -88,28 +85,26 @@ struct PixfmtRGB(T, ORD)
 
 struct PixfmtRGBA(T, ORD)
 {
-    alias PixfmtRGBA!(T, ORD) selfType;
+    alias PixfmtRGBA!(T, ORD) SelfType;
     alias T ComponentType;
-    alias RGBA!T ColorType;
 
     T[ORD.NumOfComponents] components;
 
-    this(ColorType c)
+    this(U)(RGBA!U c)
     {
         set(c);
     }
-    ColorType get() const
+    RGBA!U get(U=T)() const
     {
-        return ColorType(r,g,b,a);
+        return RGBA!U(r,g,b,a);
     }
-    void set(ColorType c)
+    void set(U)(RGBA!U c)
     {
-        r = c.r;
-        g = c.g;
-        b = c.b;
-        a = c.a;
+        auto t = RGBA!T(c);
+        r = t.r; g = t.g;
+        b = t.b; a = t.a;
     }
-    void opAssign(ColorType c)
+    void opAssign(U)(RGBA!U c)
     {
         set(c);
     }
@@ -117,27 +112,20 @@ struct PixfmtRGBA(T, ORD)
     T r() const { return components[ORD.R]; }
     T g() const { return components[ORD.G]; }
     T b() const { return components[ORD.B]; }
-    T a() const { return components[ORD.A]; } 
-    ref T r() { return components[ORD.R]; }
-    ref T g() { return components[ORD.G]; }
-    ref T b() { return components[ORD.B]; }
-    ref T a() { return components[ORD.A]; }
+    T a() const { return components[ORD.A]; }
+    ref T r()   { return components[ORD.R]; }
+    ref T g()   { return components[ORD.G]; }
+    ref T b()   { return components[ORD.B]; }
+    ref T a()   { return components[ORD.A]; }
 
-    void blend(selfType pixel, ComponentType alpha)
+    void blend(SelfType pixel, ComponentType alpha)
     {
-        // premultiply fg pixel
-        if (pixel.a != ComponentType.max)
+        immutable sa = pixel.a;
+        if (sa != saturated!ComponentType)
         {
-            pixel.r = multiply(pixel.r, pixel.a);
-            pixel.g = multiply(pixel.g, pixel.a);
-            pixel.b = multiply(pixel.b, pixel.a);
-        }
-        // premultiply bg pixel
-        if (a != ComponentType.max)
-        {
-            r = multiply(r, a);
-            g = multiply(g, a);
-            b = multiply(b, a);
+            pixel.r = multiply(pixel.r, sa);
+            pixel.g = multiply(pixel.g, sa);
+            pixel.b = multiply(pixel.b, sa);
         }
         r = lerp(r, pixel.r, alpha);
         g = lerp(g, pixel.g, alpha);

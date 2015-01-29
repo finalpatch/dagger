@@ -8,7 +8,7 @@ import std.range;
 
 import dagger.surface;
 import dagger.rasterizer;
-import dagger.pixelformat;
+import dagger.pixfmt;
 
 class SolidColorRenderer(SURFACE)
 {
@@ -52,11 +52,13 @@ auto solidColorRenderer(SURFACE)(SURFACE surface)
 
 void render(RENDERER, RASTERIZER)(RENDERER ren, RASTERIZER ras)
 {
+    auto scanlines = ras.getScanlines();
     auto h = ren.height();
-    foreach(line; parallel(ras.finish()))
+    //foreach(line; parallel(scanlines))
+    foreach(line; scanlines)
     {
         // clip y here
-        if (line.length > 0 && line[0].y >= 0 && line[0].y < h)
+        if (line.length > 0 && line[0].y < h)
         {
             sort!("a.x < b.x")(line);
             renderScanline(line, ren, ras);

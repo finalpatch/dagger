@@ -6,7 +6,7 @@ import std.algorithm;
 import std.datetime;
 import derelict.sdl2.sdl;
 import dagger.surface;
-import dagger.pixelformat;
+import dagger.pixfmt;
 import dagger.rasterizer;
 import dagger.renderer;
 import dagger.path;

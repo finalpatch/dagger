@@ -7,15 +7,14 @@ import dagger.basics;
 struct Gray(T)
 {
     T l,a;
-
-    this(T _l, T _a) { l = _l; a = _a; }
-    this(T _l)
+    this(U)(U _l, U _a = saturated!U())
     {
-        l = _l;
-        static if (isFloatingPoint!T)
-            a = 1.0;
-        else if (isIntegral!T)
-            a = T.max;
+        l = convertComponent!T(_l);
+        a = convertComponent!T(_a);
+    }
+    this(U)(Gray!U other)
+    {
+        this(other.l, other.a);
     }
 }
 
@@ -23,34 +22,16 @@ struct RGBA(T)
 {
     T r,g,b,a;
 
-    this(T _r, T _g, T _b, T _a) { r = _r; g = _g; b = _b; a = _a; }
-    this(T _r, T _g, T _b)
+    this(U)(U _r, U _g, U _b, U _a = saturated!U())
     {
-        r = _r; g = _g; b = _b;
-        static if (isFloatingPoint!T)
-            a = 1.0;
-        else if (isIntegral!T)
-            a = T.max;
+        r = convertComponent!T(_r);
+        g = convertComponent!T(_g);
+        b = convertComponent!T(_b);
+        a = convertComponent!T(_a);
     }
-    static if (!is(T==double))
+    this(U)(RGBA!U other)
     {
-        this(RGBA!double rgba)
-        {
-            static if (is(T==float))
-            {
-                r = rgba.r;
-                g = rgba.g;
-                b = rgba.b;
-                a = rgba.a;
-            }
-            else
-            {
-                r = cast(T)uround(rgba.r * T.max);
-                g = cast(T)uround(rgba.g * T.max);
-                b = cast(T)uround(rgba.b * T.max);
-                a = cast(T)uround(rgba.a * T.max);
-            }
-        }
+        this(other.r, other.g, other.b, other.a);
     }
 }
 

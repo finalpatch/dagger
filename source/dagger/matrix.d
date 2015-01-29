@@ -3,13 +3,12 @@ module dagger.matrix;
 import std.math;
 import std.algorithm;
 import std.range;
-import std.string;
 
 struct Vector(T, alias N)
 {
     enum size = N;
     alias T valtype;
-    
+
     this (T...) (T args)
     {
         static if(args.length == 1)
@@ -82,7 +81,7 @@ struct Vector(T, alias N)
     }
 
     alias v this;
-    
+
     T[N] v;
 }
 
@@ -116,7 +115,7 @@ struct Matrix(T, alias N)
         else
             static assert("wrong number of arguments");
     }
-    
+
     struct Slice
     {
         const(T)[] mat;
@@ -191,6 +190,7 @@ struct Matrix(T, alias N)
 
 protected template Unroll(alias CODE, alias N, alias SEP="")
 {
+    import std.string;
     enum t = replace(CODE, "%", "%1$d");
     enum Unroll = iota(N).map!(i => format(t, i)).join(SEP);
 }
