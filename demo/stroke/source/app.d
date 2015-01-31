@@ -30,7 +30,7 @@ ubyte[] draw()
     auto ras = new Rasterizer();
     auto ren = solidColorRenderer(surface);
 
-	path[0].flag = VertexFlag.Move;
+	path[0].flag = VertexFlag.MoveTo;
 	auto s = stroke(path, 20);
 	ras.addPath(s);
 
@@ -81,7 +81,7 @@ int main()
 			{
 			if (event.button.button == SDL_BUTTON_LEFT)
 			{
-				path ~= [PathVertex(event.button.x, event.button.y)];
+				path ~= [PathVertex(event.button.x, event.button.y, VertexFlag.LineTo)];
 			}
 			else if (event.button.button == SDL_BUTTON_RIGHT)
 			{

@@ -21,9 +21,8 @@ alias VertexT!double Vertex;
 // -----------------------------------------------------------------------------
 
 enum VertexFlag {
-    None,
-    Move,
-    CtrlPt,
+    MoveTo,
+    LineTo,
     Close,
 }
 
@@ -33,7 +32,7 @@ struct PathVertexT(T)
     T x, y;
     VertexFlag flag;
 
-    this(T _x, T _y, VertexFlag _flag = VertexFlag.None)
+    this(T _x, T _y, VertexFlag _flag)
     {
         x = _x; y = _y; flag = _flag;
     }
@@ -43,9 +42,9 @@ alias PathVertexT!double PathVertex;
 
 // -----------------------------------------------------------------------------
 
-auto trans(CONTAINER, MATRIX)(in CONTAINER vertices, in MATRIX m)
+auto trans(RANGE, MATRIX)(in RANGE vertices, in MATRIX m)
 {
-    alias ForeachType!CONTAINER VertexType;
+    alias ForeachType!RANGE VertexType;
     alias VertexType.ValueType ValueType;
     auto tr(VertexType vertex)
     {
@@ -60,9 +59,9 @@ auto trans(CONTAINER, MATRIX)(in CONTAINER vertices, in MATRIX m)
     return map!tr(vertices);
 }
 
-auto clip(CONTAINER, T1,T2)(CONTAINER vertices, T1 x1, T1 y1, T2 x2, T2 y2)
+auto clip(RANGE, T1,T2)(RANGE vertices, T1 x1, T1 y1, T2 x2, T2 y2)
 {
-    alias ForeachType!CONTAINER VertexType;
+    alias ForeachType!RANGE VertexType;
     alias VertexType.ValueType ValueType;
     auto tr(VertexType vertex)
     {
@@ -111,12 +110,12 @@ void fixPolygonOrientation (PATH, PolygonOrientation orientation = PolygonOrient
 
 unittest
 {
-    auto path = [PathVertex(0,0,VertexFlag.Move),
-                 PathVertex(1,0),
+    auto path = [PathVertex(0,0,VertexFlag.MoveTo),
+                 PathVertex(1,0,VertexFlag.LineTo),
                  PathVertex(1,1,VertexFlag.Close)];
     fixPolygonOrientation(path);
-    auto path1 = [PathVertex(1,1,VertexFlag.Move),
-                  PathVertex(1,0),
+    auto path1 = [PathVertex(1,1,VertexFlag.MoveTo),
+                  PathVertex(1,0,VertexFlag.LineTo),
                   PathVertex(0,0,VertexFlag.Close)];
     assert(path == path1);
 }
