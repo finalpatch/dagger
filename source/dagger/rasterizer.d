@@ -36,18 +36,19 @@ public:
             return;
         auto first = path.front();
         auto last = first;
+        auto lastmove = last;
         path.popFront();
         foreach(v; path)
         {
             if (v.flag == VertexFlag.MoveTo)
             {
-                last = v;
+                lastmove = last = v;
             }
             else if (v.flag == VertexFlag.Close)
             {
                 addLine(last.x, last.y, v.x, v.y);
-                addLine(v.x, v.y, first.x, first.y);
-                last = v;
+                addLine(v.x, v.y, lastmove.x, lastmove.y);
+                last = lastmove;
             }
             else
             {

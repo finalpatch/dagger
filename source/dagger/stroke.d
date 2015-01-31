@@ -19,12 +19,25 @@ class StrokeConverter
 public:
     this(RANGE)(RANGE path, double width)
     {
-        m_rest = path[];
+        PathVertex[] current;
+        foreach(v; path)
+        {
+            if (v.flag == VertexFlag.MoveTo)
+            {
+                if (current.length > 1)
+                    m_segments ~= current;
+                current = [v];
+            }
+            else
+                current ~= [v];
+        }
+        if (current.length > 1)
+            m_segments ~= current;
         m_halfWidth = width / 2;
     }
     bool empty() const
     {
-        return m_rest.empty && m_output.empty;
+        return m_output.empty && m_segments.empty;
     }
     auto front()
     {
@@ -40,21 +53,13 @@ public:
     }
 
     double m_halfWidth;
-    PathVertex[] m_rest;
     PathVertex[] m_output;
+    PathVertex[][] m_segments;
 
     void produceOutput()
     {
-        if(m_rest.empty())
-            return;
-
-        PathVertex[] segment;
-        do
-        {
-            auto result = m_rest[1..$].find!(a=>a.flag==VertexFlag.MoveTo)();
-            segment = m_rest[0..m_rest.length - result.length];
-            m_rest = result;
-        } while (segment.length < 2 && !m_rest.empty());
+        PathVertex[] segment = m_segments.front();
+        m_segments.popFront();
 
         for(auto i = 0; i < (segment.length-2); ++i)
         {

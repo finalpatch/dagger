@@ -85,7 +85,7 @@ int main()
 			}
 			else if (event.button.button == SDL_BUTTON_RIGHT)
 			{
-				path = [];
+                path ~= [PathVertex(event.button.x, event.button.y, VertexFlag.MoveTo)];
 			}
 			buffer = draw();
 			SDL_UpdateTexture(tex, cast(const(SDL_Rect)*)null, cast(const void*)buffer, width * pixfmt.sizeof);
