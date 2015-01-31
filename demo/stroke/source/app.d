@@ -10,8 +10,7 @@ import dagger.pixfmt;
 import dagger.rasterizer;
 import dagger.renderer;
 import dagger.path;
-import dagger.matrix;
-import dagger.transform;
+import dagger.math;
 import dagger.stroke;
 
 alias PixfmtRGB8 pixfmt;
@@ -34,7 +33,7 @@ ubyte[] draw()
 	path[0].flag = VertexFlag.Move;
 	auto s = stroke(path, 20);
 	ras.addPath(s);
-	
+
 	render(ren, ras);
 	return surface.bytes();
 }

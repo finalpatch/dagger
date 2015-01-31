@@ -10,8 +10,7 @@ import dagger.pixfmt;
 import dagger.rasterizer;
 import dagger.renderer;
 import dagger.path;
-import dagger.matrix;
-import dagger.transform;
+import dagger.math;
 
 alias PixfmtBGRA8 pixfmt;
 immutable width     = 800;
@@ -24,7 +23,7 @@ RGBA8[] g_colors;
 
 void parse_lion()
 {
-    RGBA8 clr;	
+    RGBA8 clr;
 	PolygonGroup group;
 
     foreach(line; lion.splitLines())
@@ -39,7 +38,7 @@ void parse_lion()
 				g_polygons ~= group;
 				group.destroy();
 			}
-			
+
             // new color
             char[] s = line.dup;
             auto clrval = parse!uint(s,16);
@@ -73,7 +72,7 @@ ubyte[] draw()
     auto ras = new Rasterizer();
     auto ren = solidColorRenderer(surface);
 
-    
+
     auto m2 = Matrix!(double,3)(2, 0, 0,
                                 0, 2, 0,
                                 400, 400, 1);
@@ -158,7 +157,7 @@ int main()
     return 0;
 }
 
-string lion = 
+string lion =
 "f2cc99\n"
 "M 69,18 L 82,8 L 99,3 L 118,5 L 135,12 L 149,21 L 156,13 L 165,9 L 177,13 L 183,28 L 180,50 L 164,91 L 155,107 L 154,114 L 151,121 L 141,127 L 139,136 L 155,206 L 157,251 L 126,342 L 133,357 L 128,376 L 83,376 L 75,368 L 67,350 L 61,350 L 53,369 L 4,369 L 2,361 L 5,354 L 12,342 L 16,321 L 4,257 L 4,244 L 7,218 L 9,179 L 26,127 L 43,93 L 32,77 L 30,70 L 24,67 L 16,49 L 17,35 L 18,23 L 30,12 L 40,7 L 53,7 L 62,12 L 69,18 L 69,18 L 69,18\n"
 "e5b27f\n"

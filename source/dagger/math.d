@@ -1,4 +1,4 @@
-module dagger.matrix;
+module dagger.math;
 
 import std.math;
 import std.algorithm;

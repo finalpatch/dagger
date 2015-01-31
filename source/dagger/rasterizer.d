@@ -6,18 +6,11 @@ import std.array;
 import dagger.basics;
 import dagger.path;
 
-class RasterizerT(int SubPixelAccuracy)
+class PathRasterizerT(int SubPixelAccuracy) : RasterizerT!SubPixelAccuracy
 {
 public:
-    enum cellWidth = 1 << subPixelAccuracy;
-    enum subPixelAccuracy = SubPixelAccuracy;
-    
     this()
     {
-        m_left = int.max;
-        m_top = int.max;
-        m_right = int.min;
-        m_bottom = int.min;
     }
     void addPolygon(T)(T vertices)
     {
@@ -64,26 +57,35 @@ public:
             }
         }
     }
+}
+
+class RasterizerT(int SubPixelAccuracy)
+{
+public:
+    enum cellWidth = 1 << subPixelAccuracy;
+    enum subPixelAccuracy = SubPixelAccuracy;
+
+    this()
+    {
+        reset();
+    }
+
     void addLine(T)(T x1, T y1, T x2, T y2)
     {
         static if (isFloatingPoint!T)
-        {
             subPixelAddLine(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
-        }
         else if (isIntegral!T)
-        {
             subPixelAddLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
-        }
     }
+
     void reset()
     {
         m_cells.clear();
-
         with(m_currentCell)
             x = y = cover = area = 0;
-        m_left = int.max;
-        m_top = int.max;
-        m_right = int.min;
+        m_left   = int.max;
+        m_top    = int.max;
+        m_right  = int.min;
         m_bottom = int.min;
     }
 
@@ -103,16 +105,17 @@ public:
         return scanlines;
     }
 
-    final int left()   { return m_left;  }
-    final int top()    { return m_top;   }
-    final int right()  { return m_right; }
-    final int bottom() { return m_bottom;}
+    final int left()   const { return m_left;  }
+    final int top()    const { return m_top;   }
+    final int right()  const { return m_right; }
+    final int bottom() const { return m_bottom;}
+
 private:
     CellStore m_cells;
     Cell m_currentCell;
     int m_left, m_top, m_right, m_bottom;
 
-    void subPixelAddLine(int x1, int y1, int x2, int y2)
+    final void subPixelAddLine(int x1, int y1, int x2, int y2)
     {
         // horizontal line
         if (y1 == y2)
@@ -132,7 +135,7 @@ private:
         m_bottom = max(y1, y2, m_bottom);
     }
 
-    void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
+    final void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
     {
         if (x != m_currentCell.x || y != m_currentCell.y)
         {
@@ -147,7 +150,7 @@ private:
         m_currentCell.area += (fx1 + fx2) * delta;
     }
 
-    void addCurrentCell()
+    final void addCurrentCell()
     {
         if (m_currentCell.cover)
         {
@@ -156,7 +159,7 @@ private:
     }
 }
 
-alias RasterizerT!8 Rasterizer;
+alias PathRasterizerT!8 Rasterizer;
 
 // -----------------------------------------------------------------------------
 

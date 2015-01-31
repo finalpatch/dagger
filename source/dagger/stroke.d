@@ -6,7 +6,7 @@ import std.algorithm;
 import std.range;
 import std.math;
 import dagger.path;
-import dagger.matrix;
+import dagger.math;
 import std.stdio;
 
 auto stroke(CONTAINER, T)(CONTAINER path, T width)
@@ -22,7 +22,7 @@ public:
         m_source = path;
         m_rest = m_source;
         m_halfWidth = width / 2;
-    }   
+    }
     bool empty() const
     {
         return m_rest.empty && m_output.empty;
@@ -62,7 +62,7 @@ public:
         {
             calcJoint(segment[i], segment[i+1], segment[i+2]);
         }
-        
+
         calcCap(segment[$-2], segment[$-1]);
 
         for(auto i = segment.length-1; i >= 2; --i)
@@ -75,7 +75,7 @@ public:
         m_output[0].flag = VertexFlag.Move;
         m_output[$-1].flag = VertexFlag.Close;
     }
-    
+
     void calcCap(in PathVertex v1, in PathVertex v2)
     {
         double dx = v2.x - v1.x;
