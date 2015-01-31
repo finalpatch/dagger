@@ -92,11 +92,12 @@ ubyte[] draw()
         m1[0,1] = sin_r;
         m1[1,0] = -sin_r;
         m1[1,1] = cos_r;
+        auto m = m0*m1*m2;
         foreach(i; 0..g_polygons.length)
         {
             ras.reset();
             foreach(polygon; g_polygons[i])
-                ras.addPolygon(polygon.trans(m0*m1*m2));
+                ras.addPolygon(polygon.trans(m));
             ren.color(g_colors[i]);
             render(ren, ras);
         }
