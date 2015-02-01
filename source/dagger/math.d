@@ -7,7 +7,7 @@ import std.range;
 struct Vector(T, alias N)
 {
     enum size = N;
-    alias T valtype;
+    alias T ValueType;
 
     this (T...) (T args)
     {
@@ -76,12 +76,12 @@ struct Vector(T, alias N)
 
 // -----------------------------------------------------------------------------
 
-V.valtype dot(V, V2)(auto ref in V v1, auto ref in V2 v2)
-    if( is(V.valtype == V2.valtype) )
+V.ValueType dot(V, V2)(auto ref in V v1, auto ref in V2 v2)
+    if( is(V.ValueType == V2.ValueType) )
 {
     return mixin(Unroll!("v1[%]*v2[%]", V.size, "+"));
 }
-V.valtype magnitude(V)(auto ref in V v)
+V.ValueType magnitude(V)(auto ref in V v)
 {
     return sqrt(dot(v, v));
 }
@@ -111,7 +111,7 @@ struct Matrix(T, int NR, int NC = NR)
         int start;
         int stride;
         enum size = SIZE;
-        alias T valtype;
+        alias T ValueType;
         this(const(T)[] m, int _start, int _stride) { mat = m; start=_start; stride=_stride; }
         T opIndex(size_t i) const {return mat[i*stride + start];}
     }
