@@ -13,7 +13,7 @@ import dagger.pixfmt;
 class SolidColorRenderer(SURFACE)
 {
 public:
-    alias SURFACE.valueType.ComponentType CoverType;
+    alias SURFACE.ValueType.ComponentType CoverType;
 
     this(SURFACE surface)
     {
@@ -40,7 +40,7 @@ public:
     final uint height() const { return m_surface.height(); }
 private:
     SURFACE m_surface;
-    SURFACE.valueType m_pixel;
+    SURFACE.ValueType m_pixel;
 }
 
 auto solidColorRenderer(SURFACE)(SURFACE surface)

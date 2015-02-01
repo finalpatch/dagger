@@ -11,7 +11,7 @@ enum RowOrder {
 class Surface(T, RowOrder rowOrder = RowOrder.TopDown)
 {
 public:
-    alias T valueType;
+    alias T ValueType;
 
     this()(uint width, uint height)
     {
