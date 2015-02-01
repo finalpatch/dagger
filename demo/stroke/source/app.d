@@ -87,6 +87,10 @@ int main()
 			{
                 path ~= [PathVertex(event.button.x, event.button.y, VertexFlag.MoveTo)];
 			}
+			else if (event.button.button == SDL_BUTTON_MIDDLE)
+			{
+				path[$-1].flag = VertexFlag.Close;
+			}
 			buffer = draw();
 			SDL_UpdateTexture(tex, cast(const(SDL_Rect)*)null, cast(const void*)buffer, width * pixfmt.sizeof);
 			SDL_RenderCopy(ren, tex, null, null);

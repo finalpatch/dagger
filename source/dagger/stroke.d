@@ -61,22 +61,35 @@ public:
         PathVertex[] segment = m_segments.front();
         m_segments.popFront();
 
-        for(auto i = 0; i < (segment.length-2); ++i)
-        {
-            calcJoint(segment[i], segment[i+1], segment[i+2]);
-        }
-
-        calcCap(segment[$-2], segment[$-1]);
-
-        for(auto i = segment.length-1; i >= 2; --i)
-        {
-            calcJoint(segment[i], segment[i-1], segment[i-2]);
-        }
-
-        calcCap(segment[1], segment[0]);
-
-        m_output[0].flag = VertexFlag.MoveTo;
-        m_output[$-1].flag = VertexFlag.Close;
+		if (segment.length > 2 && segment[$-1].flag == VertexFlag.Close)
+		{
+			// out edge
+			for(auto i = 0; i < (segment.length-2); ++i)
+				calcJoint(segment[i], segment[i+1], segment[i+2]);
+			calcJoint(segment[$-2], segment[$-1], segment[0]);
+			calcJoint(segment[$-1], segment[0], segment[1]);
+			m_output[0].flag = VertexFlag.MoveTo;
+			m_output[$-1].flag = VertexFlag.Close;
+			auto innerStart = m_output.length;
+			// inner edge
+			for(auto i = segment.length-1; i >= 2; --i)
+				calcJoint(segment[i], segment[i-1], segment[i-2]);
+			calcJoint(segment[1], segment[0], segment[$-1]);
+			calcJoint(segment[0], segment[$-1], segment[$-2]);
+			m_output[innerStart].flag = VertexFlag.MoveTo;
+			m_output[$-1].flag = VertexFlag.Close;
+		}
+		else
+		{
+			for(auto i = 0; i < (segment.length-2); ++i)
+				calcJoint(segment[i], segment[i+1], segment[i+2]);
+			calcCap(segment[$-2], segment[$-1]);
+			for(auto i = segment.length-1; i >= 2; --i)
+				calcJoint(segment[i], segment[i-1], segment[i-2]);
+			calcCap(segment[1], segment[0]);
+			m_output[0].flag = VertexFlag.MoveTo;
+			m_output[$-1].flag = VertexFlag.Close;
+		}
     }
 
     void calcCap(in PathVertex v1, in PathVertex v2)

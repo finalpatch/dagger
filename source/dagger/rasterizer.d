@@ -131,8 +131,8 @@ private:
         y2 >>= subPixelAccuracy;
         m_left   = min(x1, x2, m_left);
         m_right  = max(x1, x2, m_right);
-        m_top    = min(y1, y2, m_top);
-        m_bottom = max(y1, y2, m_bottom);
+        m_top    = max(0, min(y1, y2, m_top));
+        m_bottom = max(0, y1, y2, m_bottom);
     }
 
     final void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
