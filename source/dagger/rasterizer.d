@@ -98,10 +98,7 @@ public:
         immutable lastLine  = bottom() + 1;
         auto scanlines = new Cell[][lastLine - firstLine];
         foreach(row; firstLine..lastLine)
-        {
-            auto scanline = m_cells.getline(row);
-            scanlines[row-firstLine] = scanline;
-        }
+            scanlines[row-firstLine] = m_cells.getline(row);
         return scanlines;
     }
 
