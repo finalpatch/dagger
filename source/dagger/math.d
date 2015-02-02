@@ -26,17 +26,17 @@ struct Vector(T, alias N)
     Vector opBinary(string op)(auto ref in T rhs) const
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
-        mixin("return Vector(" ~ Unroll!("v[%]"~op~"rhs;", N, ",") ~ ");");
+        mixin("return Vector(" ~ Unroll!("v[%]"~op~"rhs", N, ",") ~ ");");
     }
     Vector opBinary(string op)(auto ref in Vector rhs) const
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
-        mixin("return Vector(" ~ Unroll!("v[%]"~op~"rhs.v[%];", N, ",") ~ ");");
+        mixin("return Vector(" ~ Unroll!("v[%]"~op~"rhs.v[%]", N, ",") ~ ");");
     }
     ref Vector opOpAssign(string op)(auto ref in Vector rhs)
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
-        mixin(Unroll!("v[%]"~op~"=rhs.v[%];", N));
+		mixin("v[]"~op~"=rhs.v[];");
         return this;
     }
 
@@ -51,8 +51,7 @@ struct Vector(T, alias N)
     Vector opBinary(string op)(auto ref in Matrix!(T,N) rhs) const
         if( op == "*")
     {
-        Vector v = this;
-        v *= rhs;
+        mixin("auto vec = Vector("~Unroll!("dot(this, rhs.colvec(%))", N,",")~");");
         return vec;
     }
 
