@@ -76,6 +76,8 @@ public:
             subPixelAddLine(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
         else if (isIntegral!T)
             subPixelAddLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
+		m_top    = cast(int)max(0, min(y1, y2, m_top));
+		m_bottom = cast(int)max(0, y1, y2, m_bottom);
     }
 
     void reset()
@@ -83,9 +85,7 @@ public:
         m_cells.clear();
         with(m_currentCell)
             x = y = cover = area = 0;
-        m_left   = int.max;
         m_top    = int.max;
-        m_right  = int.min;
         m_bottom = int.min;
     }
 
@@ -102,15 +102,13 @@ public:
         return scanlines;
     }
 
-    final int left()   const { return m_left;  }
     final int top()    const { return m_top;   }
-    final int right()  const { return m_right; }
     final int bottom() const { return m_bottom;}
 
 private:
     CellStore m_cells;
     Cell m_currentCell;
-    int m_left, m_top, m_right, m_bottom;
+    int m_top, m_bottom;
 
     final void subPixelAddLine(int x1, int y1, int x2, int y2)
     {
@@ -122,14 +120,6 @@ private:
             this.updateCell(x, y, fx1, fy1, fx2, fy2);
         }
         map_grid_spans!(subPixelAccuracy, callUpdateCell)(x1, y1, x2, y2);
-        x1 >>= subPixelAccuracy;
-        y1 >>= subPixelAccuracy;
-        x2 >>= subPixelAccuracy;
-        y2 >>= subPixelAccuracy;
-        m_left   = min(x1, x2, m_left);
-        m_right  = max(x1, x2, m_right);
-        m_top    = max(0, min(y1, y2, m_top));
-        m_bottom = max(0, y1, y2, m_bottom);
     }
 
     final void updateCell(int x, int y, int fx1, int fy1, int fx2, int fy2)
