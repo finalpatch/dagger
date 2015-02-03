@@ -120,17 +120,11 @@ struct PixfmtRGBA(T, ORD)
 
     void blend(SelfType pixel, ComponentType alpha)
     {
-        immutable sa = pixel.a;
-        if (sa != saturated!ComponentType)
-        {
-            pixel.r = multiply(pixel.r, sa);
-            pixel.g = multiply(pixel.g, sa);
-            pixel.b = multiply(pixel.b, sa);
-        }
+        alpha = multiply(pixel.a, alpha);
+        a = lerp(a, saturated!ComponentType, alpha);
         r = lerp(r, pixel.r, alpha);
         g = lerp(g, pixel.g, alpha);
         b = lerp(b, pixel.b, alpha);
-        a = lerp(a, pixel.a, alpha);
     }
 }
 
