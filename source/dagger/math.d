@@ -8,6 +8,7 @@ struct Vector(T, alias N)
 {
     enum size = N;
     alias T ValueType;
+	alias v this;
 
     this (T...) (T args)
     {
@@ -57,15 +58,18 @@ struct Vector(T, alias N)
 
     static if (N >= 1)
     {
-        T x() { return v[0]; }
+        T x() const { return v[0]; }
+		ref T x()   { return v[0]; }
     }
     static if (N >= 2)
     {
-        T y() { return v[1]; }
+        T y() const { return v[1]; }
+		ref T y()   { return v[1]; }
     }
     static if (N >= 3)
     {
-        T z() { return v[2]; }
+        T z() const { return v[2]; }
+		ref T z()   { return v[2]; }
     }
 
     alias v this;
@@ -88,6 +92,15 @@ ref auto normalize(V)(auto ref in V v)
 {
     v.v[] /= magnitude(v);
     return v;
+}
+auto normalized(V)(V v)
+{
+	v.v[] /= magnitude(v);
+	return v;
+}
+auto rotateccw90(V)(in V v)
+{
+	return V(-v.y, v.x);
 }
 
 // -----------------------------------------------------------------------------

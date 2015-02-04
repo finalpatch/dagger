@@ -31,7 +31,7 @@ ubyte[] draw()
     auto ren = solidColorRenderer(surface);
 
 	path[0].flag = VertexFlag.MoveTo;
-	auto s = stroke(path, 20);
+	auto s = stroke(path, 20, JoinStyle.Miter);
 	ras.addPath(s);
 
 	render(ren, ras);

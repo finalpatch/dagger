@@ -8,8 +8,9 @@ import dagger.math;
 struct VertexT(T)
 {
     alias T ValueType;
-    T x, y;
-
+    Vector!(T, 2) vec;
+	alias vec this;
+	
     this(T _x, T _y)
     {
         x = _x; y = _y;
@@ -29,12 +30,18 @@ enum VertexFlag {
 struct PathVertexT(T)
 {
     alias T ValueType;
-    T x, y;
+	VertexT!T vtx;
     VertexFlag flag;
+
+	alias vtx this;
 
     this(T _x, T _y, VertexFlag _flag)
     {
         x = _x; y = _y; flag = _flag;
+    }
+    this(Vector!(T,2) v, VertexFlag _flag)
+    {
+        vtx.vec = v, flag = _flag;
     }
 }
 

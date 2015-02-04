@@ -9,9 +9,18 @@ import dagger.path;
 import dagger.math;
 import std.stdio;
 
-auto stroke(RANGE, T)(RANGE path, T width)
+enum JoinStyle
 {
-    return new StrokeConverter(path, cast(double)width);
+	Bevel,
+	Miter,
+	Round
+}
+
+auto stroke(RANGE, T)(RANGE path, T width, JoinStyle joinStyle = JoinStyle.Bevel)
+{
+	auto o = new StrokeConverter(path, cast(double)width);
+	o.joinStyle = joinStyle;
+    return o;
 }
 
 class StrokeConverter
@@ -52,6 +61,9 @@ public:
         m_output.popFront();
     }
 
+	JoinStyle joinStyle = JoinStyle.Bevel;
+
+private:
     double m_halfWidth;
     PathVertex[] m_output;
     PathVertex[][] m_segments;
@@ -102,32 +114,47 @@ public:
         auto p2 = PathVertex(dy * m_halfWidth + v2.x, -dx * m_halfWidth + v2.y, VertexFlag.LineTo);
         m_output  ~= [p1, p2];
     }
-    void calcJoint(in PathVertex v1, in PathVertex v2, in PathVertex v3)
+
+	void calcJoint(in PathVertex v1, in PathVertex v2, in PathVertex v3)
+	{
+		switch(joinStyle)
+		{
+			case JoinStyle.Bevel:
+				return  calcBevelJoint(v1, v2, v3);
+			case JoinStyle.Miter:
+				return calcMiterJoint(v1, v2, v3);
+			case JoinStyle.Round:
+				assert(false);
+			default:
+				assert(false);
+		}
+	}
+    
+	void calcMiterJoint(in PathVertex v1, in PathVertex v2, in PathVertex v3)
     {
-        double dx1 = v2.x - v1.x;
-        double dy1 = v2.y - v1.y;
-        auto l = sqrt(dx1 * dx1 + dy1 * dy1);
-        dx1 /= l; dy1 /= l;
-
-        double dx2 = v3.x - v2.x;
-        double dy2 = v3.y - v2.y;
-        l = sqrt(dx2 * dx2 + dy2 * dy2);
-        dx2 /= l; dy2 /= l;
-
-        double dx = dx2 - dx1;
-        double dy = dy2 - dy1;
-        l = sqrt(dx * dx + dy * dy);
-        dx /= l; dy /= l;
-        double cos_a = (dx * dx1 + dy * dy1);
-        double sin_a = sqrt(1 - cos_a * cos_a);
-
+		auto d1 = (v2 - v1).normalized;
+		auto d2 = (v3 - v2).normalized;
+		auto d = (d2 - d1).normalized;
+		auto cos_a = d.dot(d1);
+		if (cos_a < -0.9)
+			return calcBevelJoint(v1,v2,v3);
+		auto sin_a = sqrt(1 - cos_a * cos_a);
         auto area = v1.x * v2.y - v1.y * v2.x + v2.x * v3.y - v2.y * v3.x + v3.x * v1.y - v3.y * v1.x;
         auto dir = area < 0 ? -1 : 1;
-
-        auto p1 = PathVertex(dir * dx * m_halfWidth / sin_a + v2.x,
-                             dir * dy * m_halfWidth / sin_a + v2.y,
-                             VertexFlag.LineTo);
+		auto t = dir * m_halfWidth / sin_a;
+        auto p1 = PathVertex(d.x * t + v2.x, d.y * t + v2.y, VertexFlag.LineTo);
         m_output  ~= [p1];
+	}		
+	
+	void calcBevelJoint(in PathVertex v1, in PathVertex v2, in PathVertex v3)
+	{
+		auto d1 = (v2 - v1).normalized;
+		auto a1 = rotateccw90(d1);
+		auto p1 = PathVertex(a1 * m_halfWidth + v2, VertexFlag.LineTo);
+		auto d2 = (v3 - v2).normalized;
+		auto a2 = rotateccw90(d2);
+		auto p2 = PathVertex(a2 * m_halfWidth + v2, VertexFlag.LineTo);
+		m_output ~= [p1, p2];
     }
 }
 
