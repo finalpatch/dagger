@@ -59,13 +59,13 @@ public:
     auto front()
     {
         if (m_output.empty)
-        {
             produceOutput();
-        }
         return m_output.front();
     }
     void popFront()
     {
+        if (m_output.empty)
+            produceOutput();
         m_output.popFront();
     }
 

@@ -1,0 +1,99 @@
+module dagger.curve;
+
+import std.range;
+import std.math;
+import dagger.math;
+import dagger.path;
+
+auto curve(RANGE)(RANGE path)
+{
+	auto o = new CurveConverter!RANGE(path);
+    return o;
+}
+
+class CurveConverter(INPUT_RANGE)
+{
+public:
+    this(INPUT_RANGE path)
+    {
+        m_input = path;
+    }
+    bool empty() const
+    {
+        return m_output.empty && m_input.empty;
+    }
+    auto front()
+    {
+        if (m_output.empty)
+            produceOutput();
+		if (m_output.empty)
+		{
+			m_output = m_current;
+			m_current = [];
+		}
+        return m_output.front();
+    }
+    void popFront()
+    {
+        if (m_output.empty)
+            produceOutput();
+		if (m_output.empty)
+		{
+			m_output = m_current;
+			m_current = [];
+		}
+        m_output.popFront();
+    }
+private:
+    INPUT_RANGE  m_input;
+    PathVertex[] m_output;
+    PathVertex[] m_current;
+
+	import std.stdio;
+
+    void produceOutput()
+    {
+		while(!m_input.empty && m_output.empty)
+		{
+			auto p = m_input.front();
+			m_input.popFront();
+
+			if (p.flag == VertexFlag.Curve3)
+			{
+				m_current ~= [p];
+				if (m_current.length == 4)
+				{
+					bezier(m_current[0].vec, m_current[1].vec, m_current[2].vec, m_current[3].vec);
+					m_current = [p];
+				}
+			}
+			else
+			{
+				m_current = [p];
+				m_output ~= [p];
+			}
+		}
+    }
+    void bezier(T)(in T p1, in T p2, in T p3, in T p4)
+    {
+        auto p12   = (p1 + p2) / 2;
+        auto p23   = (p2 + p3) / 2;
+        auto p34   = (p3 + p4) / 2;
+        auto p123  = (p12 + p23) / 2;
+        auto p234  = (p23 + p34) / 2;
+        auto p1234 = (p123 + p234) / 2;
+
+        auto d = p4-p1;
+        auto d2 = fabs(((p2.x - p4.x) * d.y - (p2.y - p4.y) * d.x));
+        auto d3 = fabs(((p3.x - p4.x) * d.y - (p3.y - p4.y) * d.x));
+
+        if((d2 + d3)*(d2 + d3) < 0.25 * (d.magnitude()))
+        {
+            m_output ~= [PathVertex(p1234, VertexFlag.LineTo)];
+            return;
+        }
+
+        bezier(p1, p12, p123, p1234);
+        bezier(p1234, p234, p34, p4);
+    }
+}

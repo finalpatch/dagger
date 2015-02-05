@@ -12,6 +12,7 @@ import dagger.renderer;
 import dagger.path;
 import dagger.math;
 import dagger.stroke;
+import dagger.curve;
 
 alias PixfmtRGB8 pixfmt;
 immutable width     = 400;
@@ -31,7 +32,7 @@ ubyte[] draw()
     auto ren = solidColorRenderer(surface);
 
 	path[0].flag = VertexFlag.MoveTo;
-	auto s = stroke(path, 20, JoinStyle.Miter);
+	auto s = path.curve().stroke(20, JoinStyle.Miter);
 	ras.addPath(s);
 
 	render(ren, ras);
@@ -81,7 +82,7 @@ int main()
 			{
 			if (event.button.button == SDL_BUTTON_LEFT)
 			{
-				path ~= [PathVertex(event.button.x, event.button.y, VertexFlag.LineTo)];
+				path ~= [PathVertex(event.button.x, event.button.y, VertexFlag.Curve3)];
 			}
 			else if (event.button.button == SDL_BUTTON_RIGHT)
 			{
