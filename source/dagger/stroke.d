@@ -37,8 +37,16 @@ public:
                     m_segments ~= current;
                 current = [v];
             }
-            else
-                current ~= [v];
+            else // line to
+            {
+                // must have at least one vertex
+                if (current.length > 0)
+                {
+                    // don't allow overlapping vertex
+                    if (current[$-1].x != v.x && current[$-1].y != v.y)
+                        current ~= [v];
+                }
+            }
         }
         if (current.length > 1)
             m_segments ~= current;
