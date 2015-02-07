@@ -25,6 +25,7 @@ enum VertexFlag {
     MoveTo,
     LineTo,
     Curve3,
+	Curve2,
     Close,
 }
 

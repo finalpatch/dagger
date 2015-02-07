@@ -63,16 +63,46 @@ private:
 				m_current ~= [p];
 				if (m_current.length == 4)
 				{
+					m_output ~= m_current[0..1];
 					bezier(m_current[0].vec, m_current[1].vec, m_current[2].vec, m_current[3].vec);
 					m_current = [p];
+					m_output ~= [p];
+				}
+			}
+			else if (p.flag == VertexFlag.Curve2)
+			{
+				m_current ~= [p];
+				if (m_current.length == 3)
+				{
+					m_output ~= m_current[0..1];
+					bezier(m_current[0].vec, m_current[1].vec, m_current[2].vec);
+					m_current = [p];
+					m_output ~= [p];
 				}
 			}
 			else
 			{
+				m_output ~= m_current;
 				m_current = [p];
-				m_output ~= [p];
 			}
 		}
+    }
+    void bezier(T)(in T p1, in T p2, in T p3)
+    {
+        auto p12   = (p1 + p2) / 2;
+        auto p23   = (p2 + p3) / 2;
+        auto p123  = (p12 + p23) / 2;
+
+		auto d = p3 - p1;
+		auto d2 = fabs(((p2.x - p3.x) * d.y - (p2.y - p3.y) * d.x));
+		if( d2 * d2 < 0.25 * dot(d, d))
+		{
+			m_output ~= [PathVertex(p123, VertexFlag.LineTo)];
+			return;
+		}
+
+        bezier(p1, p12, p123);
+        bezier(p123, p23, p3);
     }
     void bezier(T)(in T p1, in T p2, in T p3, in T p4)
     {
@@ -87,7 +117,7 @@ private:
         auto d2 = fabs(((p2.x - p4.x) * d.y - (p2.y - p4.y) * d.x));
         auto d3 = fabs(((p3.x - p4.x) * d.y - (p3.y - p4.y) * d.x));
 
-        if((d2 + d3)*(d2 + d3) < 0.25 * (d.magnitude()))
+        if((d2 + d3)*(d2 + d3) < 0.25 * dot(d, d))
         {
             m_output ~= [PathVertex(p1234, VertexFlag.LineTo)];
             return;
