@@ -21,29 +21,32 @@ alias VertexT!double Vertex;
 
 // -----------------------------------------------------------------------------
 
-enum VertexFlag {
+enum VertexAttr {
     MoveTo,
     LineTo,
     Curve3,
 	Curve2,
-    Close,
+	//
+    Close = 0x80000000
 }
 
 struct PathVertexT(T)
 {
     alias T ValueType;
 	VertexT!T vtx;
-    VertexFlag flag;
+    VertexAttr attr;
+	VertexAttr cmd()  const { return cast(VertexAttr)(attr & 0xffff); }
+	VertexAttr flag() const { return cast(VertexAttr)(attr & 0xffff0000); }
 
 	alias vtx this;
 
-    this(T _x, T _y, VertexFlag _flag)
+    this(T _x, T _y, VertexAttr _flag)
     {
-        x = _x; y = _y; flag = _flag;
+        x = _x; y = _y; attr = _flag;
     }
-    this(Vector!(T,2) v, VertexFlag _flag)
+    this(Vector!(T,2) v, VertexAttr _flag)
     {
-        vtx.vec = v, flag = _flag;
+        vtx.vec = v, attr = _flag;
     }
 }
 
@@ -96,7 +99,7 @@ void fixPolygonOrientation (PATH, PolygonOrientation orientation = PolygonOrient
     {
         if (area < 0) reverse(polygon);
     }
-    static if (__traits(compiles, polygon[0].flag == VertexFlag.None))
+    static if (__traits(compiles, polygon[0].flag == VertexAttr.None))
     {
         swap(polygon[0].flag, polygon[$-1].flag);
     }
@@ -106,13 +109,13 @@ void fixPolygonOrientation (PATH, PolygonOrientation orientation = PolygonOrient
 
 unittest
 {
-    auto path = [PathVertex(0,0,VertexFlag.MoveTo),
-                 PathVertex(1,0,VertexFlag.LineTo),
-                 PathVertex(1,1,VertexFlag.Close)];
+    auto path = [PathVertex(0,0,VertexAttr.MoveTo),
+                 PathVertex(1,0,VertexAttr.LineTo),
+                 PathVertex(1,1,VertexAttr.Close)];
     fixPolygonOrientation(path);
-    auto path1 = [PathVertex(1,1,VertexFlag.MoveTo),
-                  PathVertex(1,0,VertexFlag.LineTo),
-                  PathVertex(0,0,VertexFlag.Close)];
+    auto path1 = [PathVertex(1,1,VertexAttr.MoveTo),
+                  PathVertex(1,0,VertexAttr.LineTo),
+                  PathVertex(0,0,VertexAttr.Close)];
     assert(path == path1);
 }
 

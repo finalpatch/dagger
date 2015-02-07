@@ -31,8 +31,8 @@ ubyte[] draw()
     auto ras = new Rasterizer();
     auto ren = solidColorRenderer(surface);
 
-	path[0].flag = VertexFlag.MoveTo;
-	auto s = path.curve().stroke(20, JoinStyle.Miter);
+	path[0].attr = VertexAttr.MoveTo;
+	auto s = path.curve().stroke(20);
 	ras.addPath(s);
 
 	render(ren, ras);
@@ -82,15 +82,15 @@ int main()
 			{
 			if (event.button.button == SDL_BUTTON_LEFT)
 			{
-				path ~= [PathVertex(event.button.x, event.button.y, VertexFlag.Curve3)];
+				path ~= [PathVertex(event.button.x, event.button.y, VertexAttr.Curve3)];
 			}
 			else if (event.button.button == SDL_BUTTON_RIGHT)
 			{
-                path ~= [PathVertex(event.button.x, event.button.y, VertexFlag.MoveTo)];
+                path ~= [PathVertex(event.button.x, event.button.y, VertexAttr.MoveTo)];
 			}
 			else if (event.button.button == SDL_BUTTON_MIDDLE)
 			{
-				path[$-1].flag = VertexFlag.Close;
+				path[$-1].attr |= VertexAttr.Close;
 			}
 			buffer = draw();
 			SDL_UpdateTexture(tex, cast(const(SDL_Rect)*)null, cast(const void*)buffer, width * pixfmt.sizeof);

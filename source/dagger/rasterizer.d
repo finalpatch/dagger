@@ -40,11 +40,11 @@ public:
         path.popFront();
         foreach(v; path)
         {
-            if (v.flag == VertexFlag.MoveTo)
+            if (v.cmd == VertexAttr.MoveTo)
             {
                 lastmove = last = v;
             }
-            else if (v.flag == VertexFlag.Close)
+            else if (v.flag & VertexAttr.Close)
             {
                 addLine(last.x, last.y, v.x, v.y);
                 addLine(v.x, v.y, lastmove.x, lastmove.y);
