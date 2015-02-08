@@ -25,6 +25,7 @@ auto stroke(RANGE, T)(RANGE path, T width, JoinStyle joinStyle = JoinStyle.Bevel
 
 class StrokeConverter
 {
+	static assert(isInputRange!StrokeConverter);
 public:
     this(RANGE)(RANGE path, double width)
     {
@@ -52,7 +53,7 @@ public:
             m_segments ~= current;
         m_halfWidth = width / 2;
     }
-    bool empty() const
+    bool empty()
     {
         return m_output.empty && m_segments.empty;
     }

@@ -13,12 +13,13 @@ auto curve(RANGE)(RANGE path)
 
 class CurveConverter(INPUT_RANGE)
 {
+	static assert(isInputRange!CurveConverter);
 public:
     this(INPUT_RANGE path)
     {
         m_input = path;
     }
-    bool empty() const
+    bool empty()
     {
         return m_output.empty && m_input.empty && m_current.empty;
     }
