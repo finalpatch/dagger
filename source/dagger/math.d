@@ -183,13 +183,18 @@ struct Matrix(T, int NR, int NC = NR)
     T[NR * NC] v;
 }
 
+alias Matrix!(double, 3) Matrix3;
+
 // -----------------------------------------------------------------------------
 
+package
+{
 protected template Unroll(alias CODE, alias N, alias SEP="")
 {
     import std.string;
     enum t = replace(CODE, "%", "%1$d");
     enum Unroll = iota(N).map!(i => format(t, i)).join(SEP);
+}
 }
 
 // Local Variables:

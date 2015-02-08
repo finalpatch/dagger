@@ -1,0 +1,10 @@
+{
+	"name": "svgtest",
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2014, fengli",
+	"authors": ["finalpatch"],
+	"dependencies": {
+        "derelict-sdl2" : ">=1.9.1",
+        "dagger": { "version":"~master", "path":"../.."}
+	}
+}

@@ -53,6 +53,8 @@ struct PathVertexT(T)
 
 alias PathVertexT!double PathVertex;
 
+alias InputRange!PathVertex VertexSource;
+
 // -----------------------------------------------------------------------------
 
 auto trans(RANGE, MATRIX)(in RANGE vertices, in MATRIX m)
