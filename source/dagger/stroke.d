@@ -7,7 +7,6 @@ import std.range;
 import std.math;
 import dagger.path;
 import dagger.math;
-import std.stdio;
 
 enum JoinStyle
 {
@@ -53,17 +52,17 @@ public:
             m_segments ~= current;
         m_halfWidth = width / 2;
     }
-    bool empty()
+    final bool empty()
     {
         return m_output.empty && m_segments.empty;
     }
-    auto front()
+    final auto front()
     {
         if (m_output.empty)
             produceOutput();
         return m_output.front();
     }
-    void popFront()
+    final void popFront()
     {
         if (m_output.empty)
             produceOutput();

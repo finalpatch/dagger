@@ -6,6 +6,7 @@ import std.range;
 import dagger.math;
 
 struct VertexT(T)
+	if (isFloatingPoint!T)
 {
     alias T ValueType;
     Vector!(T, 2) vec;

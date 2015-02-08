@@ -19,17 +19,17 @@ public:
     {
         m_input = path;
     }
-    bool empty()
+    final bool empty()
     {
         return m_output.empty && m_input.empty && m_current.empty;
     }
-    auto front()
+    final auto front()
     {
         if (m_output.empty)
             produceOutput();
         return m_output.front();
     }
-    void popFront()
+    final void popFront()
     {
         if (m_output.empty)
             produceOutput();
@@ -39,8 +39,6 @@ private:
     INPUT_RANGE  m_input;
     PathVertex[] m_output;
     PathVertex[] m_current;
-
-	import std.stdio;
 
     void produceOutput()
     {
