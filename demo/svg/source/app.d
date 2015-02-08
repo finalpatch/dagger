@@ -5,11 +5,13 @@ import dagger.pixfmt;
 import dagger.rasterizer;
 import dagger.renderer;
 import dagger.path;
+import dagger.curve;
+import dagger.stroke;
 import derelict.sdl2.sdl;
 
 alias PixfmtRGB8 pixfmt;
-immutable width     = 400;
-immutable height    = 400;
+immutable width     = 1000;
+immutable height    = 1000;
 
 ubyte[] draw(SvgShape[] shapes)
 {
@@ -21,16 +23,39 @@ ubyte[] draw(SvgShape[] shapes)
 
 	foreach (shape; shapes)
 	{
-		ras.reset();
-		foreach(elem; shape.elems)
+		if (shape.fillColor.a > 0)
 		{
-			if (elem.elemType == SvgElement.Polyline)
+			ras.reset();
+			ren.color(shape.fillColor);
+			foreach(elem; shape.elems)
 			{
-				ras.addPolygon(elem.polylineData.path);
+				if (elem.elemType == SvgElement.Path)
+				{
+					auto path = elem.pathData.path;
+
+					/*foreach(p; path.trans(shape.transform))
+					{
+						writefln("%s , %s", p.x, p.y);
+					}*/
+
+					ras.addPath(path.trans(shape.transform).curve);
+				}
+				else if (elem.elemType == SvgElement.Polyline)
+					ras.addPolygon(elem.polylineData.path);
 			}
+			render(ren, ras);
 		}
-		ren.color(shape.fillColor);
-		render(ren, ras);
+		/*if (shape.strokeWidth > 0)
+		{
+			ras.reset();
+			ren.color(shape.strokeColor);
+			foreach(elem; shape.elems)
+			{
+				if (elem.elemType == SvgElement.Path)
+					ras.addPath(elem.pathData.path.trans(shape.transform).curve.stroke(shape.strokeWidth));
+			}
+			render(ren, ras);
+		}*/
 	}
 
 	return surface.bytes();
@@ -38,7 +63,7 @@ ubyte[] draw(SvgShape[] shapes)
 
 int main()
 {
-	auto svg = readText("lion.svg");
+	auto svg = readText("tiger.svg");
 	auto shapes = parseSVG(svg);
 
     DerelictSDL2.load();
