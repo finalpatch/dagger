@@ -50,6 +50,14 @@ public:
         }
         if (current.length > 1)
             m_segments ~= current;
+		foreach(ref seg; m_segments)
+		{
+			while ((seg.back.attr & VertexAttr.Close) && (seg.back.vtx == seg.front.vtx))
+			{
+				seg.popBack();
+				seg.back.attr |= VertexAttr.Close;
+			}
+		}
         m_halfWidth = width / 2;
     }
     final bool empty()

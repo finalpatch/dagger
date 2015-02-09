@@ -13,10 +13,12 @@ struct SvgShape
 {
 	RGBA8        fillColor;
 	RGBA8        strokeColor;
-	double       strokeWidth;
+	double       strokeWidth = 0;
 	Matrix3      transform = Matrix3(1,0,0,0,1,0,0,0,1);
 	SvgElemData  elems[];
 }
+
+
 
 enum SvgElement
 {
@@ -149,6 +151,12 @@ SvgShape[] parseSVG(string svg)
 	{
 		if (elem == "g")
 		{
+			// if stroke color is set but width is not, set width to 1
+			if (context.current.strokeColor.a > 0 && context.current.strokeWidth == 0)
+				context.current.strokeWidth = 1;
+			// if stroke width is set but color is not, set color to black
+			if (context.current.strokeWidth > 0 && context.current.strokeColor.a == 0)
+				context.current.strokeColor = RGBA8(0,0,0);
 			shapes ~= context.current;
 			context.pop();
 		}
@@ -163,7 +171,7 @@ package
 
 struct Context
 {
-	SvgShape[] stack = [ SvgShape() ];
+	SvgShape[] stack = [ SvgShape.init ];
 
 	ref SvgShape current() { return stack.back(); }
 
@@ -259,7 +267,7 @@ PathVertex[] parsePath(string input)
 			while(!input.empty && !cmds.canFind(input.front))
 			{
 				double x = parse!double(input); munch(input, ", \t\n\r");
-				double y = backlog.prev(0).y;
+				double y = rel ? 0 : backlog.prev(0).y;
 				auto v = PathVertex(x, y, VertexAttr.LineTo);
 				if (rel) v += backlog.prev(0);
 				addVertex(v);
@@ -273,7 +281,7 @@ PathVertex[] parsePath(string input)
 			input.popFront();
 			while(!input.empty && !cmds.canFind(input.front))
 			{
-				double x = backlog.prev(0).x;
+				double x = rel ? 0 : backlog.prev(0).x;
 				double y = parse!double(input); munch(input, ", \t\n\r");
 				auto v = PathVertex(x, y, VertexAttr.LineTo);
 				if (rel) v += backlog.prev(0);

@@ -1,4 +1,4 @@
-import std.file, std.stdio;
+import std.file, std.stdio, std.array;
 import dagger.svg;
 import dagger.surface;
 import dagger.pixfmt;
@@ -11,7 +11,7 @@ import derelict.sdl2.sdl;
 
 alias PixfmtRGB8 pixfmt;
 immutable width     = 1000;
-immutable height    = 1000;
+immutable height    = 800;
 
 ubyte[] draw(SvgShape[] shapes)
 {
@@ -23,39 +23,38 @@ ubyte[] draw(SvgShape[] shapes)
 
 	foreach (shape; shapes)
 	{
+		ras.reset();
+		PathVertex[][] paths;
+
+		foreach(elem; shape.elems)
+		{
+			if (elem.elemType == SvgElement.Path)
+				paths ~= elem.pathData.path.trans(shape.transform).curve.array;
+			else if (elem.elemType == SvgElement.Polyline)
+				ras.addPolygon(elem.polylineData.path);
+		}
+		
 		if (shape.fillColor.a > 0)
 		{
-			ras.reset();
 			ren.color(shape.fillColor);
-			foreach(elem; shape.elems)
-			{
-				if (elem.elemType == SvgElement.Path)
-				{
-					auto path = elem.pathData.path;
-
-					/*foreach(p; path.trans(shape.transform))
-					{
-						writefln("%s , %s", p.x, p.y);
-					}*/
-
-					ras.addPath(path.trans(shape.transform).curve);
-				}
-				else if (elem.elemType == SvgElement.Polyline)
-					ras.addPolygon(elem.polylineData.path);
-			}
+			foreach(path; paths)
+				ras.addPath(path);
 			render(ren, ras);
 		}
-		/*if (shape.strokeWidth > 0)
+
+		if (shape.strokeWidth > 0)
 		{
 			ras.reset();
 			ren.color(shape.strokeColor);
-			foreach(elem; shape.elems)
-			{
-				if (elem.elemType == SvgElement.Path)
-					ras.addPath(elem.pathData.path.trans(shape.transform).curve.stroke(shape.strokeWidth));
-			}
+			
+			auto xscale = shape.transform[0,0];
+			auto yscale = shape.transform[1,1];
+			auto scale = (xscale + yscale)/2;
+
+			foreach(path; paths)
+				ras.addPath(path.stroke(shape.strokeWidth*scale));
 			render(ren, ras);
-		}*/
+		}
 	}
 
 	return surface.bytes();
