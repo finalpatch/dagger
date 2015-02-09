@@ -18,8 +18,6 @@ struct SvgShape
     SvgElemData  elems[];
 }
 
-
-
 enum SvgElement
 {
     Circle,
@@ -230,187 +228,137 @@ PathVertex[] parsePath(string input)
 
     while(!input.empty)
     {
-        if (input.front == 'm' || input.front == 'M')
+        auto cmd = input.front;
+        input.popFront;
+        input = input.stripLeft;
+        bool rel = cmd.isLower;
+        cmd = std.ascii.toLower(cmd);
+        switch(cmd)
         {
-            bool rel = (input.front == 'm');
-            input.popFront();
+        case 'm':
+        case 'l':
+            auto a = (cmd=='l') ? VertexAttr.LineTo : VertexAttr.MoveTo;
             while(!input.empty && !cmds.canFind(input.front))
             {
-                double x = parse!double(input); munch(input, ", \t\n\r");
-                double y = parse!double(input); munch(input, ", \t\n\r");
-                auto v = PathVertex(x, y, VertexAttr.MoveTo);
+                double x = parseFloat(input);
+                double y = parseFloat(input);
+                auto v = PathVertex(x, y, a);
                 if (rel) v += backlog.prev(0);
                 addVertex(v);
                 backlog.push(v);
                 backlog.push(v);
             }
-        }
-        else if (input.front == 'l' || input.front == 'L')
-        {
-            bool rel = (input.front == 'l');
-            input.popFront();
+            break;
+        case 'h':
+        case 'v':
             while(!input.empty && !cmds.canFind(input.front))
             {
-                double x = parse!double(input); munch(input, ", \t\n\r");
-                double y = parse!double(input); munch(input, ", \t\n\r");
+                double x, y;
+                if (cmd =='h')
+                {
+                    x = parseFloat(input);
+                    y = rel ? 0 : backlog.prev(0).y;
+                }
+                else // v
+                {
+                    x = rel ? 0 : backlog.prev(0).x;
+                    y = parseFloat(input);
+                }
                 auto v = PathVertex(x, y, VertexAttr.LineTo);
                 if (rel) v += backlog.prev(0);
                 addVertex(v);
                 backlog.push(v);
                 backlog.push(v);
             }
-        }
-        else if (input.front == 'h' || input.front == 'H')
-        {
-            bool rel = (input.front == 'h');
-            input.popFront();
+            break;
+        case 'c':
             while(!input.empty && !cmds.canFind(input.front))
             {
-                double x = parse!double(input); munch(input, ", \t\n\r");
-                double y = rel ? 0 : backlog.prev(0).y;
-                auto v = PathVertex(x, y, VertexAttr.LineTo);
-                if (rel) v += backlog.prev(0);
-                addVertex(v);
-                backlog.push(v);
-                backlog.push(v);
+                PathVertex[3] v;
+                for (int i = 0; i < v.length; ++i)
+                {
+                    double x = parseFloat(input);
+                    double y = parseFloat(input);
+                    v[i] = PathVertex(x, y, VertexAttr.Curve3);
+                    if (rel) v[i] += backlog.prev(0);
+                    addVertex(v[i]);
+                }
+                backlog.push(v[1]);
+                backlog.push(v[2]);
             }
-        }
-        else if (input.front == 'v' || input.front == 'V')
-        {
-            bool rel = (input.front == 'v');
-            input.popFront();
-            while(!input.empty && !cmds.canFind(input.front))
-            {
-                double x = rel ? 0 : backlog.prev(0).x;
-                double y = parse!double(input); munch(input, ", \t\n\r");
-                auto v = PathVertex(x, y, VertexAttr.LineTo);
-                if (rel) v += backlog.prev(0);
-                addVertex(v);
-                backlog.push(v);
-                backlog.push(v);
-            }
-        }
-        else if (input.front == 'c' || input.front == 'C')
-        {
-            bool rel = (input.front == 'c');
-            input.popFront();
-
-            while(!input.empty && !cmds.canFind(input.front))
-            {
-                double x = parse!double(input); munch(input, ", \t\n\r");
-                double y = parse!double(input); munch(input, ", \t\n\r");
-                auto v1 = PathVertex(x, y, VertexAttr.Curve3);
-                if (rel) v1 += backlog.prev(0);
-                addVertex(v1);
-
-                x = parse!double(input); munch(input, ", \t\n\r");
-                y = parse!double(input); munch(input, ", \t\n\r");
-                auto v2 = PathVertex(x, y, VertexAttr.Curve3);
-                if (rel) v2 += backlog.prev(0);
-                addVertex(v2);
-
-                x = parse!double(input); munch(input, ", \t\n\r");
-                y = parse!double(input); munch(input, ", \t\n\r");
-                auto v3 = PathVertex(x, y, VertexAttr.Curve3);
-                if (rel) v3 += backlog.prev(0);
-                addVertex(v3);
-
-                backlog.push(v2);
-                backlog.push(v3);
-            }
-        }
-        else if (input.front == 's' || input.front == 'S')
-        {
-            bool rel = (input.front == 's');
-            input.popFront();
-            
+            break;
+        case 's':
             while(!input.empty && !cmds.canFind(input.front))
             {
                 auto p1 = backlog.prev(0);
                 auto pp = backlog.prev(1);
-                auto d  = p1 - pp;
-                auto p2 = PathVertex(p1 + d, VertexAttr.Curve3);
+                auto p2 = PathVertex(p1 * 2 - pp, VertexAttr.Curve3);
                 addVertex(p2);
 
-                double x = parse!double(input); munch(input, ", \t\n\r");
-                double y = parse!double(input); munch(input, ", \t\n\r");
-                auto v1 = PathVertex(x, y, VertexAttr.Curve3);
-                if (rel) v1 += backlog.prev(0);
-                addVertex(v1);
-
-                x = parse!double(input); munch(input, ", \t\n\r");
-                y = parse!double(input); munch(input, ", \t\n\r");
-                auto v2 = PathVertex(x, y, VertexAttr.Curve3);
-                if (rel) v2 += backlog.prev(0);
-                addVertex(v2);
-
-                backlog.push(v1);
-                backlog.push(v2);
+                PathVertex[2] v;
+                for (int i = 0; i < v.length; ++i)
+                {
+                    double x = parseFloat(input);
+                    double y = parseFloat(input);
+                    v[i] = PathVertex(x, y, VertexAttr.Curve3);
+                    if (rel) v[i] += backlog.prev(0);
+                    addVertex(v[i]);
+                }
+                backlog.push(v[0]);
+                backlog.push(v[1]);
             }
-        }
-        else if (input.front == 'q' || input.front == 'Q')
-        {
-            bool rel = (input.front == 'q');
-            input.popFront();
-
+            break;
+        case 'q':
             while(!input.empty && !cmds.canFind(input.front))
             {
-                double x = parse!double(input); munch(input, ", \t\n\r");
-                double y = parse!double(input); munch(input, ", \t\n\r");
-                auto v1 = PathVertex(x, y, VertexAttr.Curve2);
-                if (rel) v1 += backlog.prev(0);
-                addVertex(v1);
-
-                x = parse!double(input); munch(input, ", \t\n\r");
-                y = parse!double(input); munch(input, ", \t\n\r");
-                auto v2 = PathVertex(x, y, VertexAttr.Curve2);
-                if (rel) v2 += backlog.prev(0);
-                addVertex(v2);
-
-                backlog.push(v1);
-                backlog.push(v2);
+                PathVertex[2] v;
+                for (int i = 0; i < v.length; ++i)
+                {
+                    double x = parseFloat(input);
+                    double y = parseFloat(input);
+                    v[i] = PathVertex(x, y, VertexAttr.Curve2);
+                    if (rel) v[i] += backlog.prev(0);
+                    addVertex(v[i]);
+                }
+                backlog.push(v[0]);
+                backlog.push(v[1]);
             }
-        }
-        else if (input.front == 't' || input.front == 'T')
-        {
-            bool rel = (input.front == 't');
-            input.popFront();
-
+            break;
+        case 't':
             while(!input.empty && !cmds.canFind(input.front))
             {
                 auto p1 = backlog.prev(0);
                 auto pp = backlog.prev(1);
-                auto d  = p1 - pp;
-                auto p2 = PathVertex(p1 + d, VertexAttr.Curve3);
+                auto p2 = PathVertex(p1 * 2 - pp, VertexAttr.Curve3);
                 addVertex(p2);
 
-                double x = parse!double(input); munch(input, ", \t\n\r");
-                double y = parse!double(input); munch(input, ", \t\n\r");
+                double x = parseFloat(input);
+                double y = parseFloat(input);
                 auto v = PathVertex(x, y, VertexAttr.Curve2);
                 if (rel) v += backlog.prev(0);
                 addVertex(v);
                 backlog.push(v);
             }
-        }
-        else if (input.front == 'a' || input.front == 'A')
-        {
+            break;
+        case 'a':
             assert(false);
-        }
-        else if (input.front == 'z' || input.front == 'Z')
-        {
-            input.popFront();
+        case 'z':
             if (!path.data.empty)
                 path.data[$-1].attr |= VertexAttr.Close;
-        }
-        else
-        {
-            import std.stdio;
-            writefln("unknown path command %s", input.front);
             break;
+        default:
+            assert(false);
         }
     }
 
     return path.data;
+}
+
+double parseFloat(ref string input)
+{
+    double x = parse!double(input);
+    munch(input, ", \t\n\r");
+    return x;
 }
 
 RGBA8 parseColor(string input)
