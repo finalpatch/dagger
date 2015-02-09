@@ -77,7 +77,7 @@ private:
 			else
 			{
 				m_output ~= m_current;
-				m_current = [];
+				m_current = [p];
 				m_output ~= [p];
 			}
 		}
