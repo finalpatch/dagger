@@ -24,20 +24,20 @@ RGBA8[] g_colors;
 void parse_lion()
 {
     RGBA8 clr;
-	PolygonGroup group;
+    PolygonGroup group;
 
     foreach(line; lion.splitLines())
     {
-		Polygon polygon;
+        Polygon polygon;
 
         if (line[0] != 'M' && line[0] != 'L')
         {
-			if (group.length > 0)
-			{
-				g_colors ~= clr;
-				g_polygons ~= group;
-				group.destroy();
-			}
+            if (group.length > 0)
+            {
+                g_colors ~= clr;
+                g_polygons ~= group;
+                group.destroy();
+            }
 
             // new color
             char[] s = line.dup;
@@ -54,14 +54,14 @@ void parse_lion()
                 auto coords = word.split(",");
                 auto x = coords[0].to!double;
                 auto y = coords[1].to!double;
-				polygon~=Vertex(x,y);
+                polygon~=Vertex(x,y);
             }
         }
-		fixPolygonOrientation(polygon);
-		group ~= polygon;
+        fixPolygonOrientation(polygon);
+        group ~= polygon;
     }
-	g_colors ~= clr;
-	g_polygons ~= group;
+    g_colors ~= clr;
+    g_polygons ~= group;
 }
 
 ubyte[] draw()
@@ -103,7 +103,7 @@ ubyte[] draw()
         }
     }
 
-	return surface.bytes();
+    return surface.bytes();
 }
 
 int main()
@@ -111,14 +111,14 @@ int main()
     DerelictSDL2.load();
     SDL_Init(SDL_INIT_VIDEO);
 
-	SDL_Window*   win;
+    SDL_Window*   win;
     SDL_Renderer* ren;
     SDL_Texture*  tex;
 
     scope(exit)
         SDL_Quit();
 
-	if (SDL_CreateWindowAndRenderer(width, height, 0, &win, &ren) < 0)
+    if (SDL_CreateWindowAndRenderer(width, height, 0, &win, &ren) < 0)
     {
         writefln("%s", SDL_GetError());
         return -1;

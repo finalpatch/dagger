@@ -6,12 +6,12 @@ import std.range;
 import dagger.math;
 
 struct VertexT(T)
-	if (isFloatingPoint!T)
+    if (isFloatingPoint!T)
 {
     alias T ValueType;
     Vector!(T, 2) vec;
-	alias vec this;
-	
+    alias vec this;
+    
     this(T _x, T _y)
     {
         x = _x; y = _y;
@@ -26,20 +26,20 @@ enum VertexAttr {
     MoveTo,
     LineTo,
     Curve3,
-	Curve2,
-	//
+    Curve2,
+    //
     Close = 0x80000000
 }
 
 struct PathVertexT(T)
 {
     alias T ValueType;
-	VertexT!T vtx;
+    VertexT!T vtx;
     VertexAttr attr;
-	VertexAttr cmd()  const { return cast(VertexAttr)(attr & 0xffff); }
-	VertexAttr flag() const { return cast(VertexAttr)(attr & 0xffff0000); }
+    VertexAttr cmd()  const { return cast(VertexAttr)(attr & 0xffff); }
+    VertexAttr flag() const { return cast(VertexAttr)(attr & 0xffff0000); }
 
-	alias vtx this;
+    alias vtx this;
 
     this(T _x, T _y, VertexAttr _flag)
     {

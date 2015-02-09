@@ -76,8 +76,8 @@ public:
             subPixelAddLine(iround(x1 * cellWidth), iround(y1 * cellWidth), iround(x2 * cellWidth), iround(y2 * cellWidth));
         else if (isIntegral!T)
             subPixelAddLine(x1 * cellWidth, y1 * cellWidth, x2 * cellWidth, y2 * cellWidth);
-		m_top    = cast(int)max(0, min(y1, y2, m_top));
-		m_bottom = cast(int)max(0, y1, y2, m_bottom);
+        m_top    = cast(int)max(0, min(y1, y2, m_top));
+        m_bottom = cast(int)max(0, y1, y2, m_bottom);
     }
 
     void reset()

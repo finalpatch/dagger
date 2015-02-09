@@ -8,7 +8,7 @@ struct Vector(T, alias N)
 {
     enum size = N;
     alias T ValueType;
-	alias v this;
+    alias v this;
 
     this (T...) (T args)
     {
@@ -37,7 +37,7 @@ struct Vector(T, alias N)
     ref Vector opOpAssign(string op)(auto ref in Vector rhs)
         if( op == "+" || op =="-" || op=="*" || op=="/" )
     {
-		mixin("v[]"~op~"=rhs.v[];");
+        mixin("v[]"~op~"=rhs.v[];");
         return this;
     }
 
@@ -59,17 +59,17 @@ struct Vector(T, alias N)
     static if (N >= 1)
     {
         T x() const { return v[0]; }
-		ref T x()   { return v[0]; }
+        ref T x()   { return v[0]; }
     }
     static if (N >= 2)
     {
         T y() const { return v[1]; }
-		ref T y()   { return v[1]; }
+        ref T y()   { return v[1]; }
     }
     static if (N >= 3)
     {
         T z() const { return v[2]; }
-		ref T z()   { return v[2]; }
+        ref T z()   { return v[2]; }
     }
 
     alias v this;
@@ -95,12 +95,12 @@ ref auto normalize(V)(auto ref in V v)
 }
 auto normalized(V)(V v)
 {
-	v.v[] /= magnitude(v);
-	return v;
+    v.v[] /= magnitude(v);
+    return v;
 }
 auto rotateccw90(V)(in V v)
 {
-	return V(-v.y, v.x);
+    return V(-v.y, v.x);
 }
 
 // -----------------------------------------------------------------------------
