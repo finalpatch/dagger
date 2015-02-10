@@ -88,7 +88,7 @@ int main()
         return -1;
     }
 
-	ubyte[] buffer;
+    ubyte[] buffer;
     auto start = Clock.currTime();
     buffer = draw(shapes);
     auto elapsed = Clock.currTime() - start;

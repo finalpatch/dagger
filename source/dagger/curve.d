@@ -26,66 +26,66 @@ public:
     final auto front()
     {
         if (!m_output.empty)
-			return m_output.front();
+            return m_output.front();
 
-		if (m_input.front.cmd != VertexAttr.Curve2 &&
-			m_input.front.cmd != VertexAttr.Curve3)
-		{
-			m_last = m_input.front();
-			return m_input.front();
-		}
+        if (m_input.front.cmd != VertexAttr.Curve2 &&
+            m_input.front.cmd != VertexAttr.Curve3)
+        {
+            m_last = m_input.front();
+            return m_input.front();
+        }
 
-		produceOutput();
-		return m_output.front();
+        produceOutput();
+        return m_output.front();
     }
     final void popFront()
     {
-		if (!m_output.empty)
-			m_output.popFront();
-		else
-			m_input.popFront();
+        if (!m_output.empty)
+            m_output.popFront();
+        else
+            m_input.popFront();
     }
 private:
     INPUT_RANGE  m_input;
-	Vertex       m_last;
+    Vertex       m_last;
     PathVertex[] m_output;
 
     void produceOutput()
     {
-		if (m_input.front.cmd == VertexAttr.Curve2)
-		{
-			auto p1 = m_last;
-			auto p2 = m_input.front; m_input.popFront;
-			if (m_input.empty)
-			{
-				m_output ~= p2;
-				return;
-			}
-			auto p3 = m_input.front; m_input.popFront;
-			bezier(p1, p2, p3);
-			m_output ~= p3;
-			m_last = p3;
-		}
-		else
-		{
-			auto p1 = m_last;
-			auto p2 = m_input.front; m_input.popFront;
-			if (m_input.empty)
-			{
-				m_output ~= p2;
-				return;
-			}
-			auto p3 = m_input.front; m_input.popFront;
-			if (m_input.empty)
-			{
-				m_output ~= [p2, p3];
-				return;
-			}
-			auto p4 = m_input.front; m_input.popFront;
-			bezier(p1, p2, p3, p4);
-			m_output ~= p4;
-			m_last = p4;
-		}
+        if (m_input.front.cmd == VertexAttr.Curve2)
+        {
+            auto p1 = m_last;
+            auto p2 = m_input.front; m_input.popFront;
+            if (m_input.empty)
+            {
+                m_output ~= p2;
+                return;
+            }
+            auto p3 = m_input.front; m_input.popFront;
+            bezier(p1, p2, p3);
+            m_output ~= p3;
+            m_last = p3;
+        }
+        else
+        {
+            auto p1 = m_last;
+            auto p2 = m_input.front; m_input.popFront;
+            if (m_input.empty)
+            {
+                m_output ~= p2;
+                return;
+            }
+            auto p3 = m_input.front; m_input.popFront;
+            if (m_input.empty)
+            {
+                m_output ~= [p2, p3];
+                return;
+            }
+            auto p4 = m_input.front; m_input.popFront;
+            bezier(p1, p2, p3, p4);
+            m_output ~= p4;
+            m_last = p4;
+        }
     }
     void bezier(T)(in T p1, in T p2, in T p3)
     {
