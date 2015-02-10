@@ -21,71 +21,71 @@ public:
     }
     final bool empty()
     {
-        return m_output.empty && m_input.empty && m_current.empty;
+        return m_output.empty && m_input.empty;
     }
     final auto front()
     {
-        if (m_output.empty)
-            produceOutput();
-        return m_output.front();
+        if (!m_output.empty)
+			return m_output.front();
+
+		if (m_input.front.cmd != VertexAttr.Curve2 &&
+			m_input.front.cmd != VertexAttr.Curve3)
+		{
+			m_last = m_input.front();
+			return m_input.front();
+		}
+
+		produceOutput();
+		return m_output.front();
     }
     final void popFront()
     {
-        if (m_output.empty)
-            produceOutput();
-        m_output.popFront();
+		if (!m_output.empty)
+			m_output.popFront();
+		else
+			m_input.popFront();
     }
 private:
     INPUT_RANGE  m_input;
+	Vertex       m_last;
     PathVertex[] m_output;
-    PathVertex[] m_current;
 
     void produceOutput()
     {
-        while(!m_input.empty && m_output.empty)
-        {
-            auto p = m_input.front();
-            m_input.popFront();
-
-            if (p.cmd == VertexAttr.Curve3)
-            {
-                p.attr = VertexAttr.LineTo | p.flag;
-                m_current ~= [p];
-                if (m_current.length == 4)
-                {
-                    m_output ~= m_current[0..1];
-                    bezier(m_current[0].vec, m_current[1].vec, m_current[2].vec, m_current[3].vec);
-                    m_current = m_current[$-1..$];
-                }
-            }
-            else if (p.cmd == VertexAttr.Curve2)
-            {
-                p.attr = VertexAttr.LineTo | p.flag;
-                m_current ~= [p];
-                if (m_current.length == 3)
-                {
-                    m_output ~= m_current[0..1];
-                    bezier(m_current[0].vec, m_current[1].vec, m_current[2].vec);
-                    m_current = m_current[$-1..$];
-                }
-            }
-            else if (p.cmd == VertexAttr.MoveTo)
-            {
-                m_output ~= m_current;
-                m_current = [p];
-            }
-            else
-            {
-                m_output ~= m_current;
-                m_current = [p];
-                m_output ~= [p];
-            }
-        }
-        if (m_output.empty)
-        {
-            m_output = m_current;
-            m_current = [];
-        }
+		if (m_input.front.cmd == VertexAttr.Curve2)
+		{
+			auto p1 = m_last;
+			auto p2 = m_input.front; m_input.popFront;
+			if (m_input.empty)
+			{
+				m_output ~= p2;
+				return;
+			}
+			auto p3 = m_input.front; m_input.popFront;
+			bezier(p1, p2, p3);
+			m_output ~= p3;
+			m_last = p3;
+		}
+		else
+		{
+			auto p1 = m_last;
+			auto p2 = m_input.front; m_input.popFront;
+			if (m_input.empty)
+			{
+				m_output ~= p2;
+				return;
+			}
+			auto p3 = m_input.front; m_input.popFront;
+			if (m_input.empty)
+			{
+				m_output ~= [p2, p3];
+				return;
+			}
+			auto p4 = m_input.front; m_input.popFront;
+			bezier(p1, p2, p3, p4);
+			m_output ~= p4;
+			m_last = p4;
+		}
     }
     void bezier(T)(in T p1, in T p2, in T p3)
     {

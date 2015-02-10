@@ -1,4 +1,5 @@
 import std.file, std.stdio, std.array;
+import std.datetime;
 import dagger.svg;
 import dagger.surface;
 import dagger.pixfmt;
@@ -87,7 +88,11 @@ int main()
         return -1;
     }
 
-    ubyte[] buffer = draw(shapes);
+	ubyte[] buffer;
+    auto start = Clock.currTime();
+    buffer = draw(shapes);
+    auto elapsed = Clock.currTime() - start;
+    writefln("%s", elapsed);
 
     SDL_UpdateTexture(tex, cast(const(SDL_Rect)*)null, cast(const void*)buffer, width * pixfmt.sizeof);
     SDL_RenderCopy(ren, tex, null, null);
