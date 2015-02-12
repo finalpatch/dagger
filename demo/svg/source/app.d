@@ -14,9 +14,9 @@ alias PixfmtRGB8 pixfmt;
 immutable width     = 1000;
 immutable height    = 800;
 
-ubyte[] draw(SvgShape[] shapes)
+void draw(SvgShape[] shapes, ubyte[] buffer)
 {
-    auto surface = new Surface!pixfmt(width, height);
+    auto surface = new Surface!pixfmt(buffer, width, height);
     surface.bytes()[] = 0xff;
 
     auto ras = new Rasterizer();
@@ -57,8 +57,6 @@ ubyte[] draw(SvgShape[] shapes)
             render(ren, ras);
         }
     }
-
-    return surface.bytes();
 }
 
 int main()
@@ -88,9 +86,10 @@ int main()
         return -1;
     }
 
-    ubyte[] buffer;
+    auto buffer = new ubyte[width * height * pixfmt.sizeof];
     auto start = Clock.currTime();
-    buffer = draw(shapes);
+    foreach(i;0..10)
+    draw(shapes, buffer);
     auto elapsed = Clock.currTime() - start;
     writefln("%s", elapsed);
 
