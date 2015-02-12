@@ -1,6 +1,7 @@
 module dagger.curve;
 
 import std.range;
+import std.array;
 import std.math;
 import dagger.math;
 import dagger.path;
@@ -49,6 +50,7 @@ private:
     INPUT_RANGE  m_input;
     Vertex       m_last;
     PathVertex[] m_output;
+    Appender!(PathVertex[]) m_appender;
 
     void produceOutput()
     {
@@ -58,12 +60,14 @@ private:
             auto p2 = m_input.front; m_input.popFront;
             if (m_input.empty)
             {
-                m_output ~= p2;
+                m_output = [p2];
                 return;
             }
             auto p3 = m_input.front; m_input.popFront;
             bezier(p1, p2, p3);
-            m_output ~= p3;
+            m_appender ~= p3;
+            m_output = m_appender.data;
+            m_appender.clear();
             m_last = p3;
         }
         else
@@ -72,18 +76,20 @@ private:
             auto p2 = m_input.front; m_input.popFront;
             if (m_input.empty)
             {
-                m_output ~= p2;
+                m_output = [p2];
                 return;
             }
             auto p3 = m_input.front; m_input.popFront;
             if (m_input.empty)
             {
-                m_output ~= [p2, p3];
+                m_output = [p2, p3];
                 return;
             }
             auto p4 = m_input.front; m_input.popFront;
             bezier(p1, p2, p3, p4);
-            m_output ~= p4;
+            m_appender ~= p4;
+            m_output = m_appender.data;
+            m_appender.clear();
             m_last = p4;
         }
     }
@@ -97,7 +103,7 @@ private:
         auto d2 = fabs(((p2.x - p3.x) * d.y - (p2.y - p3.y) * d.x));
         if( d2 * d2 < 0.25 * dot(d, d))
         {
-            m_output ~= [PathVertex(p123, VertexAttr.LineTo)];
+            m_appender ~= [PathVertex(p123, VertexAttr.LineTo)];
             return;
         }
 
@@ -119,7 +125,7 @@ private:
 
         if((d2 + d3)*(d2 + d3) < 0.25 * dot(d, d))
         {
-            m_output ~= [PathVertex(p1234, VertexAttr.LineTo)];
+            m_appender ~= [PathVertex(p1234, VertexAttr.LineTo)];
             return;
         }
 
