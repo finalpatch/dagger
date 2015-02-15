@@ -64,9 +64,9 @@ void parse_lion()
     g_polygons ~= group;
 }
 
-ubyte[] draw()
+void draw(ubyte[] buffer)
 {
-    auto surface = new Surface!pixfmt(width, height);
+    auto surface = new Surface!pixfmt(buffer, width, height);
     surface.bytes()[] = 0xff;
 
     auto ras = new Rasterizer();
@@ -102,8 +102,6 @@ ubyte[] draw()
             render(ren, ras);
         }
     }
-
-    return surface.bytes();
 }
 
 int main()
@@ -131,8 +129,9 @@ int main()
     }
 
     parse_lion();
+    auto buffer = new ubyte[width * height * pixfmt.sizeof];
     auto start = Clock.currTime();
-    ubyte[] buffer = draw();
+    draw(buffer);
     auto elapsed = Clock.currTime() - start;
     writefln("%s", elapsed);
 
