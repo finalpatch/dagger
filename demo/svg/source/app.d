@@ -88,7 +88,6 @@ int main()
 
     auto buffer = new ubyte[width * height * pixfmt.sizeof];
     auto start = Clock.currTime();
-    foreach(i;0..10)
     draw(shapes, buffer);
     auto elapsed = Clock.currTime() - start;
     writefln("%s", elapsed);

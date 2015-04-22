@@ -15,7 +15,7 @@ struct SvgShape
     RGBA8        strokeColor;
     double       strokeWidth = 0;
     Matrix3      transform = Matrix3(1,0,0,0,1,0,0,0,1);
-    SvgElemData  elems[];
+    SvgElemData[] elems;
 }
 
 enum SvgElement
@@ -198,7 +198,7 @@ Matrix3 identityTransform()
 
 struct BackLog(T, int N)
 {
-    T data[N];
+    T[N] data;
     int idx = 0;
 
     ref const(T) prev(int n)
@@ -423,7 +423,7 @@ Matrix3 parseTransform(string input)
         while(!input.empty && input.front !=')')
             input.popFront();
         string str = mark[0..$-input.length];
-        double data[6];
+        double[6] data;
         int i = 0;
         foreach(s; str.splitter(','))
         {
